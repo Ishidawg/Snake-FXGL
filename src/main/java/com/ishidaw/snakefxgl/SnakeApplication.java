@@ -6,6 +6,7 @@ import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.entity.Entity;
 import com.almasb.fxgl.entity.components.CollidableComponent;
 import com.almasb.fxgl.physics.CollisionHandler;
+import com.ishidaw.snakefxgl.Entities.CollectibleItems;
 import javafx.scene.input.KeyCode;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
@@ -16,6 +17,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+import com.ishidaw.snakefxgl.Enums.EntityType;
+
 import static com.almasb.fxgl.dsl.FXGLForKtKt.getWorldProperties;
 
 public class SnakeApplication extends GameApplication {
@@ -23,7 +26,8 @@ public class SnakeApplication extends GameApplication {
     Random random = new Random();
 
     private Entity snake;
-    private Entity apple;
+
+    CollectibleItems appleItem = new CollectibleItems();
 
     // assets are 32x32, so it NEEDS to be 640 (32 * 20).
     static final int SCREEN_WIDTH = 640;
@@ -40,10 +44,6 @@ public class SnakeApplication extends GameApplication {
 
     private final List<Entity> snakeUnits = new ArrayList<>();
 
-    public enum EntityType {
-        PLAYER, APPLE
-    }
-
     boolean running = true;
     String direction = "Down"; // Start direction
 
@@ -56,17 +56,17 @@ public class SnakeApplication extends GameApplication {
         settings.setTicksPerSecond(60);
     }
 
-    public void createApple() {
-        int appleX = random.nextInt(SCREEN_WIDTH / UNIT_SIZE) * UNIT_SIZE;
-        int appleY = random.nextInt(SCREEN_HEIGHT / UNIT_SIZE) * UNIT_SIZE;
-
-        apple = FXGL.entityBuilder()
-                .type(EntityType.APPLE)
-                .at(appleX, appleY)
-                .viewWithBBox(new Rectangle(UNIT_SIZE, UNIT_SIZE, Color.RED))
-                .with(new CollidableComponent(true))
-                .buildAndAttach();
-    }
+//    public void createApple() {
+//        int appleX = random.nextInt(SCREEN_WIDTH / UNIT_SIZE) * UNIT_SIZE;
+//        int appleY = random.nextInt(SCREEN_HEIGHT / UNIT_SIZE) * UNIT_SIZE;
+//
+//        apple = FXGL.entityBuilder()
+//                .type(EntityType.APPLE)
+//                .at(appleX, appleY)
+//                .viewWithBBox(new Rectangle(UNIT_SIZE, UNIT_SIZE, Color.RED))
+//                .with(new CollidableComponent(true))
+//                .buildAndAttach();
+//    }
 
     public void snakeAddUnits() {
         Entity newSegment = FXGL.entityBuilder()
@@ -92,7 +92,7 @@ public class SnakeApplication extends GameApplication {
 
         // Means that the snakeUnits[0] is the "head" -> snake
         snake = snakeUnits.getFirst();
-        createApple();
+        appleItem.createApple(SCREEN_WIDTH, SCREEN_WIDTH, UNIT_SIZE);
     }
 
     @Override
@@ -183,7 +183,7 @@ public class SnakeApplication extends GameApplication {
                 bodyParts++;
 
                 gameSpeed = Math.max(gameSpeed - 0.01, 0.05);
-                createApple();
+                appleItem.createApple(SCREEN_WIDTH, SCREEN_WIDTH, UNIT_SIZE);
             }
         });
     }
