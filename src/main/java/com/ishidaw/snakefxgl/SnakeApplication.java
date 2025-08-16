@@ -22,10 +22,10 @@ public class SnakeApplication extends GameApplication {
     Snake snakePlayer = new Snake();
     CollectibleItems appleItem = new CollectibleItems();
 
-    // assets are 32x32, so it NEEDS to be 640 (32 * 20).
+    // assets are 32x32, so it NEEDS to be multiple of 2 (32 * 20).
     // bunch of constants
-    static final int SCREEN_WIDTH = 640;
-    static final int SCREEN_HEIGHT = 640;
+    static final int SCREEN_WIDTH = 1024;
+    static final int SCREEN_HEIGHT = 1024;
     static final int DEFAULT_EATEN_APPLES = 0;
     static final int DEFAULT_BODY_PARTS = 1;
     static final int UNIT_SIZE = 32; // Cell size
@@ -143,26 +143,29 @@ public class SnakeApplication extends GameApplication {
         vars.put("applesEatenFXGL", applesEaten);
     }
 
-    @Override
-    protected void initPhysics() {
-        FXGL.getPhysicsWorld().addCollisionHandler(new CollisionHandler(EntityType.PLAYER, EntityType.APPLE) {
+    // Custom check "collision" -> check the position of CollectibleItem and Snake
 
-            @Override
-            protected void onCollisionBegin(Entity player, Entity apple) {
-                // Collision counts only if it's the head [0]
-                if (player != snakePlayer.getSnakeUnits().getFirst()) return;
 
-                FXGL.inc("applesEatenFXGL", +1);
-                apple.removeFromWorld();
-
-                snakePlayer.snakeAddUnits(bodyParts, UNIT_SIZE);
-                bodyParts++;
-
-                gameSpeed = Math.max(gameSpeed - 0.01, 0.05);
-                appleItem.createApple(SCREEN_WIDTH, SCREEN_WIDTH, UNIT_SIZE);
-            }
-        });
-    }
+//    @Override
+    ////    protected void initPhysics() {
+    ////        FXGL.getPhysicsWorld().addCollisionHandler(new CollisionHandler(EntityType.PLAYER, EntityType.APPLE) {
+    ////
+    ////            @Override
+    ////            protected void onCollisionBegin(Entity player, Entity apple) {
+    ////                // Collision counts only if it's the head [0]
+    ////                if (player != snakePlayer.getSnakeUnits().getFirst()) return;
+    ////
+    ////                FXGL.inc("applesEatenFXGL", +1);
+    ////                apple.removeFromWorld();
+    ////
+    ////                snakePlayer.snakeAddUnits(bodyParts, UNIT_SIZE);
+    ////                bodyParts++;
+    ////
+    ////                gameSpeed = Math.max(gameSpeed - 0.01, 0.05);
+    ////                appleItem.createApple(SCREEN_WIDTH, SCREEN_WIDTH, UNIT_SIZE);
+    ////            }
+    ////        });
+    ////    }
 
     @Override
     protected void initUI() {
