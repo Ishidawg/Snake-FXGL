@@ -4,18 +4,14 @@ import com.almasb.fxgl.app.GameApplication;
 import com.almasb.fxgl.app.GameSettings;
 import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.entity.Entity;
-import com.almasb.fxgl.entity.components.CollidableComponent;
 import com.almasb.fxgl.physics.CollisionHandler;
 import com.ishidaw.snakefxgl.Entities.CollectibleItems;
+import com.ishidaw.snakefxgl.Entities.Snake;
 import javafx.scene.input.KeyCode;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
 import com.ishidaw.snakefxgl.Enums.EntityType;
 
@@ -23,10 +19,7 @@ import static com.almasb.fxgl.dsl.FXGLForKtKt.getWorldProperties;
 
 public class SnakeApplication extends GameApplication {
 
-    Random random = new Random();
-
-    private Entity snake;
-
+    Snake snakePlayer = new Snake();
     CollectibleItems appleItem = new CollectibleItems();
 
     // assets are 32x32, so it NEEDS to be 640 (32 * 20).
@@ -42,8 +35,6 @@ public class SnakeApplication extends GameApplication {
     private double moveTimer = 0;
     private double gameSpeed = 0.08;
 
-    private final List<Entity> snakeUnits = new ArrayList<>();
-
     boolean running = true;
     String direction = "Down"; // Start direction
 
@@ -56,42 +47,9 @@ public class SnakeApplication extends GameApplication {
         settings.setTicksPerSecond(60);
     }
 
-//    public void createApple() {
-//        int appleX = random.nextInt(SCREEN_WIDTH / UNIT_SIZE) * UNIT_SIZE;
-//        int appleY = random.nextInt(SCREEN_HEIGHT / UNIT_SIZE) * UNIT_SIZE;
-//
-//        apple = FXGL.entityBuilder()
-//                .type(EntityType.APPLE)
-//                .at(appleX, appleY)
-//                .viewWithBBox(new Rectangle(UNIT_SIZE, UNIT_SIZE, Color.RED))
-//                .with(new CollidableComponent(true))
-//                .buildAndAttach();
-//    }
-
-    public void snakeAddUnits() {
-        Entity newSegment = FXGL.entityBuilder()
-                .type(EntityType.PLAYER)
-                .at(snakeUnits.get(bodyParts - 1).getX(), snakeUnits.get(bodyParts - 1).getY())
-                .viewWithBBox(new Rectangle(UNIT_SIZE, UNIT_SIZE, Color.BLACK))
-                .with(new CollidableComponent(true))
-                .buildAndAttach();
-        snakeUnits.add(newSegment);
-    }
-
     @Override
     protected void initGame() {
-        for (int i = 0; i < bodyParts; i++) {
-            Entity segment = FXGL.entityBuilder()
-                    .type(EntityType.PLAYER)
-                    .at(SCREEN_WIDTH / 2 - i * UNIT_SIZE, SCREEN_HEIGHT / 2)
-                    .viewWithBBox(new Rectangle(UNIT_SIZE, UNIT_SIZE, Color.GREEN))
-                    .with(new CollidableComponent(true))
-                    .buildAndAttach();
-            snakeUnits.add(segment);
-        }
-
-        // Means that the snakeUnits[0] is the "head" -> snake
-        snake = snakeUnits.getFirst();
+        snakePlayer.createSnake(bodyParts, SCREEN_WIDTH, SCREEN_HEIGHT, UNIT_SIZE);
         appleItem.createApple(SCREEN_WIDTH, SCREEN_WIDTH, UNIT_SIZE);
     }
 
@@ -99,22 +57,22 @@ public class SnakeApplication extends GameApplication {
     protected void initInput() {
         FXGL.onKey(KeyCode.W, () -> {
             if (!running) return;
-            if(snakeUnits.getFirst().getPosition().getY() > 0 && direction != "Down") direction = "Up"; // move UP
+            if(snakePlayer.getSnakeUnits().getFirst().getPosition().getY() > 0 && direction != "Down") direction = "Up"; // move UP
         });
 
         FXGL.onKey(KeyCode.S, () -> {
             if (!running) return;
-            if(snakeUnits.getFirst().getPosition().getY() < SCREEN_HEIGHT - UNIT_SIZE && direction != "Up") direction = "Down"; // move DOWN
+            if(snakePlayer.getSnakeUnits().getFirst().getPosition().getY() < SCREEN_HEIGHT - UNIT_SIZE && direction != "Up") direction = "Down"; // move DOWN
         });
 
         FXGL.onKey(KeyCode.D, () -> {
             if (!running) return;
-            if(snakeUnits.getFirst().getPosition().getX() < SCREEN_WIDTH - UNIT_SIZE && direction != "Left") direction = "Right"; // move RIGHT
+            if(snakePlayer.getSnakeUnits().getFirst().getPosition().getX() < SCREEN_WIDTH - UNIT_SIZE && direction != "Left") direction = "Right"; // move RIGHT
         });
 
         FXGL.onKey(KeyCode.A, () -> {
             if (!running) return;
-            if(snakeUnits.getFirst().getPosition().getX() > 0 && direction != "Right") direction = "Left"; // move LEFT
+            if(snakePlayer.getSnakeUnits().getFirst().getPosition().getX() > 0 && direction != "Right") direction = "Left"; // move LEFT
         });
     }
 
@@ -128,34 +86,34 @@ public class SnakeApplication extends GameApplication {
         }
         moveTimer = 0;
 
-        double prevX = snakeUnits.getFirst().getX();
-        double prevY = snakeUnits.getFirst().getY();
+        double prevX = snakePlayer.getSnakeUnits().getFirst().getX();
+        double prevY = snakePlayer.getSnakeUnits().getFirst().getY();
 
         switch (direction) {
-            case "Up": snakeUnits.getFirst().translateY(-UNIT_SIZE); break;
-            case "Down": snakeUnits.getFirst().translateY(UNIT_SIZE); break;
-            case "Left": snakeUnits.getFirst().translateX(-UNIT_SIZE); break;
-            case "Right": snakeUnits.getFirst().translateX(UNIT_SIZE); break;
+            case "Up": snakePlayer.getSnakeUnits().getFirst().translateY(-UNIT_SIZE); break;
+            case "Down": snakePlayer.getSnakeUnits().getFirst().translateY(UNIT_SIZE); break;
+            case "Left": snakePlayer.getSnakeUnits().getFirst().translateX(-UNIT_SIZE); break;
+            case "Right": snakePlayer.getSnakeUnits().getFirst().translateX(UNIT_SIZE); break;
             default: break;
         }
 
         for (int i = 1; i < bodyParts; i++) {
-            double tempX = snakeUnits.get(i).getX();
-            double tempY = snakeUnits.get(i).getY();
-            snakeUnits.get(i).setPosition(prevX, prevY);
+            double tempX = snakePlayer.getSnakeUnits().get(i).getX();
+            double tempY = snakePlayer.getSnakeUnits().get(i).getY();
+            snakePlayer.getSnakeUnits().get(i).setPosition(prevX, prevY);
             prevX = tempX;
             prevY = tempY;
         }
 
-        double headX = snakeUnits.getFirst().getX();
-        double headY = snakeUnits.getFirst().getY();
+        double headX = snakePlayer.getSnakeUnits().getFirst().getX();
+        double headY = snakePlayer.getSnakeUnits().getFirst().getY();
         if (headX < 0 || headX >= SCREEN_WIDTH || headY < 0 || headY >= SCREEN_HEIGHT) {
             gameOver();
             return;
         }
 
         for (int i = 1; i < bodyParts; i++) {
-            if (headX == snakeUnits.get(i).getX() && headY == snakeUnits.get(i).getY()) {
+            if (headX == snakePlayer.getSnakeUnits().get(i).getX() && headY == snakePlayer.getSnakeUnits().get(i).getY()) {
                 gameOver();
                 return;
             }
@@ -174,12 +132,12 @@ public class SnakeApplication extends GameApplication {
 
             @Override
             protected void onCollisionBegin(Entity player, Entity apple) {
-                if (player != snakeUnits.getFirst()) return;
+                if (player != snakePlayer.getSnakeUnits().getFirst()) return;
 
                 FXGL.inc("applesEatenFXGL", +1);
                 apple.removeFromWorld();
 
-                snakeAddUnits();
+                snakePlayer.snakeAddUnits(bodyParts, UNIT_SIZE);
                 bodyParts++;
 
                 gameSpeed = Math.max(gameSpeed - 0.01, 0.05);
@@ -205,7 +163,7 @@ public class SnakeApplication extends GameApplication {
     private void gameOver() {
         running = false;
 
-        snake.removeFromWorld();
+        snakePlayer.removeSnake();
 
         direction = " ";
 
