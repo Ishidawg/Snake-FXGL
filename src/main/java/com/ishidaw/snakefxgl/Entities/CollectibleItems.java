@@ -21,7 +21,7 @@ public class CollectibleItems {
         apple = FXGL.entityBuilder()
                 .type(EntityType.APPLE)
                 .at(appleX, appleY)
-                .viewWithBBox(new Rectangle(UNIT_SIZE, UNIT_SIZE, Color.RED))
+                .viewWithBBox(new Rectangle(UNIT_SIZE - 2*2, UNIT_SIZE - 2*2, Color.RED))
                 .with(new CollidableComponent(true))
                 .buildAndAttach();
     }

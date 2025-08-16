@@ -23,6 +23,7 @@ public class SnakeApplication extends GameApplication {
     CollectibleItems appleItem = new CollectibleItems();
 
     // assets are 32x32, so it NEEDS to be 640 (32 * 20).
+    // bunch of constants
     static final int SCREEN_WIDTH = 640;
     static final int SCREEN_HEIGHT = 640;
     static final int DEFAULT_EATEN_APPLES = 0;
@@ -32,8 +33,9 @@ public class SnakeApplication extends GameApplication {
     int applesEaten = DEFAULT_EATEN_APPLES;
     int bodyParts = DEFAULT_BODY_PARTS;
 
-    private double moveTimer = 0;
-    private double gameSpeed = 0.08;
+    // Keeps snake under controlled speed
+    private double moveTimer = 0; // Just iterate elapsed time
+    private double gameSpeed = 0.10; // Seconds between snakes moves
 
     boolean running = true;
     String direction = "Down"; // Start direction
@@ -55,6 +57,7 @@ public class SnakeApplication extends GameApplication {
 
     @Override
     protected void initInput() {
+        // The running check is to ignore inputs if it's game over
         FXGL.onKey(KeyCode.W, () -> {
             if (!running) return;
             if(snakePlayer.getSnakeUnits().getFirst().getPosition().getY() > 0 && direction != "Down") direction = "Up"; // move UP
@@ -77,15 +80,27 @@ public class SnakeApplication extends GameApplication {
     }
 
     @Override
-    protected void onUpdate(double tpf) {
+    protected void onUpdate(double tpf) { // tpf is apprx 0.0167, framelimit = 60
         if (!running) return;
 
         moveTimer += tpf;
-        if (moveTimer < gameSpeed) {
-            return;
-        }
-        moveTimer = 0;
 
+        int maxSteps = 5;
+        int steps = 0;
+
+        // This is the "auto movement" behind the snake, and how speedy is based on the while loop within the Move Timer and GameSpeed
+        while (moveTimer >= gameSpeed && steps < maxSteps) {
+            moveTimer -= gameSpeed;
+            moveOneStep();
+            steps++;
+        }
+
+    }
+
+
+
+    private void moveOneStep() {
+        // Save the previous head position, so I can use it later to move the body segments
         double prevX = snakePlayer.getSnakeUnits().getFirst().getX();
         double prevY = snakePlayer.getSnakeUnits().getFirst().getY();
 
@@ -97,6 +112,7 @@ public class SnakeApplication extends GameApplication {
             default: break;
         }
 
+        // Use the head position to move each body part onto it
         for (int i = 1; i < bodyParts; i++) {
             double tempX = snakePlayer.getSnakeUnits().get(i).getX();
             double tempY = snakePlayer.getSnakeUnits().get(i).getY();
@@ -105,6 +121,7 @@ public class SnakeApplication extends GameApplication {
             prevY = tempY;
         }
 
+        // Check if head hits screen bounds
         double headX = snakePlayer.getSnakeUnits().getFirst().getX();
         double headY = snakePlayer.getSnakeUnits().getFirst().getY();
         if (headX < 0 || headX >= SCREEN_WIDTH || headY < 0 || headY >= SCREEN_HEIGHT) {
@@ -112,13 +129,13 @@ public class SnakeApplication extends GameApplication {
             return;
         }
 
+        // Check if head hits some bodypart
         for (int i = 1; i < bodyParts; i++) {
             if (headX == snakePlayer.getSnakeUnits().get(i).getX() && headY == snakePlayer.getSnakeUnits().get(i).getY()) {
                 gameOver();
                 return;
             }
         }
-
     }
 
     @Override
@@ -132,6 +149,7 @@ public class SnakeApplication extends GameApplication {
 
             @Override
             protected void onCollisionBegin(Entity player, Entity apple) {
+                // Collision counts only if it's the head [0]
                 if (player != snakePlayer.getSnakeUnits().getFirst()) return;
 
                 FXGL.inc("applesEatenFXGL", +1);
