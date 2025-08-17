@@ -4,12 +4,10 @@ import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.entity.Entity;
 import com.almasb.fxgl.entity.components.CollidableComponent;
 import com.ishidaw.snakefxgl.Enums.EntityType;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
 
 import java.util.Random;
 
-public class CollectibleItems {
+public class CollectibleItems extends Entity {
 
     Random random = new Random();
     private Entity apple;
@@ -21,8 +19,16 @@ public class CollectibleItems {
         apple = FXGL.entityBuilder()
                 .type(EntityType.APPLE)
                 .at(appleX, appleY)
-                .viewWithBBox(new Rectangle(UNIT_SIZE - 2*2, UNIT_SIZE - 2*2, Color.RED))
+                .viewWithBBox("jewel.png")
                 .with(new CollidableComponent(true))
                 .buildAndAttach();
+    }
+
+    public double itemX(Entity item) {
+        return item.getX();
+    }
+
+    public double itemY(Entity item) {
+        return item.getY();
     }
 }

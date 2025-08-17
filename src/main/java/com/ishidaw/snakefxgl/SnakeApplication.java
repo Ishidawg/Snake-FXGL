@@ -2,6 +2,7 @@ package com.ishidaw.snakefxgl;
 
 import com.almasb.fxgl.app.GameApplication;
 import com.almasb.fxgl.app.GameSettings;
+import com.almasb.fxgl.app.scene.FXGLScene;
 import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.entity.Entity;
 import com.almasb.fxgl.physics.CollisionHandler;
@@ -9,6 +10,7 @@ import com.ishidaw.snakefxgl.Entities.CollectibleItems;
 import com.ishidaw.snakefxgl.Entities.Snake;
 import javafx.scene.input.KeyCode;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 
 import java.util.Map;
@@ -24,8 +26,8 @@ public class SnakeApplication extends GameApplication {
 
     // assets are 32x32, so it NEEDS to be multiple of 2 (32 * 20).
     // bunch of constants
-    static final int SCREEN_WIDTH = 1024;
-    static final int SCREEN_HEIGHT = 1024;
+    static final int SCREEN_WIDTH = 512;
+    static final int SCREEN_HEIGHT = 512;
     static final int DEFAULT_EATEN_APPLES = 0;
     static final int DEFAULT_BODY_PARTS = 1;
     static final int UNIT_SIZE = 32; // Cell size
@@ -51,8 +53,30 @@ public class SnakeApplication extends GameApplication {
 
     @Override
     protected void initGame() {
+        initBackground();
         snakePlayer.createSnake(bodyParts, SCREEN_WIDTH, SCREEN_HEIGHT, UNIT_SIZE);
         appleItem.createApple(SCREEN_WIDTH, SCREEN_WIDTH, UNIT_SIZE);
+    }
+
+    // default angle 180
+    public void playerMovementUp() {
+        direction = "Up";
+        snakePlayer.setSnakeHead(90);
+    }
+
+    public void playerMovementDown() {
+        direction = "Down";
+        snakePlayer.setSnakeHead(270);
+    }
+
+    public void playerMovementRight() {
+        direction = "Right";
+        snakePlayer.setSnakeHead(180);
+    }
+
+    public void playerMovementLeft() {
+        direction = "Left";
+        snakePlayer.setSnakeHead(360);
     }
 
     @Override
@@ -60,22 +84,22 @@ public class SnakeApplication extends GameApplication {
         // The running check is to ignore inputs if it's game over
         FXGL.onKey(KeyCode.W, () -> {
             if (!running) return;
-            if(snakePlayer.getSnakeUnits().getFirst().getPosition().getY() > 0 && direction != "Down") direction = "Up"; // move UP
+            if(snakePlayer.getSnakeUnits().getFirst().getPosition().getY() > 0 && direction != "Down") playerMovementUp();
         });
 
         FXGL.onKey(KeyCode.S, () -> {
             if (!running) return;
-            if(snakePlayer.getSnakeUnits().getFirst().getPosition().getY() < SCREEN_HEIGHT - UNIT_SIZE && direction != "Up") direction = "Down"; // move DOWN
+            if(snakePlayer.getSnakeUnits().getFirst().getPosition().getY() < SCREEN_HEIGHT - UNIT_SIZE && direction != "Up") playerMovementDown();
         });
 
         FXGL.onKey(KeyCode.D, () -> {
             if (!running) return;
-            if(snakePlayer.getSnakeUnits().getFirst().getPosition().getX() < SCREEN_WIDTH - UNIT_SIZE && direction != "Left") direction = "Right"; // move RIGHT
+            if(snakePlayer.getSnakeUnits().getFirst().getPosition().getX() < SCREEN_WIDTH - UNIT_SIZE && direction != "Left") playerMovementRight();
         });
 
         FXGL.onKey(KeyCode.A, () -> {
             if (!running) return;
-            if(snakePlayer.getSnakeUnits().getFirst().getPosition().getX() > 0 && direction != "Right") direction = "Left"; // move LEFT
+            if(snakePlayer.getSnakeUnits().getFirst().getPosition().getX() > 0 && direction != "Right") playerMovementLeft();
         });
     }
 
@@ -97,12 +121,19 @@ public class SnakeApplication extends GameApplication {
 
     }
 
-
+    public void initBackground() {
+        Entity bkg = FXGL.entityBuilder()
+                .view("background.png")
+                .buildAndAttach();
+    }
 
     private void moveOneStep() {
         // Save the previous head position, so I can use it later to move the body segments
-        double prevX = snakePlayer.getSnakeUnits().getFirst().getX();
-        double prevY = snakePlayer.getSnakeUnits().getFirst().getY();
+        // double prevX = snakePlayer.getSnakeUnits().getFirst().getX();
+        // double prevY = snakePlayer.getSnakeUnits().getFirst().getY();
+
+        double prevX = snakePlayer.snakeHeadX();
+        double prevY = snakePlayer.snakeHeadY();
 
         switch (direction) {
             case "Up": snakePlayer.getSnakeUnits().getFirst().translateY(-UNIT_SIZE); break;
@@ -122,8 +153,8 @@ public class SnakeApplication extends GameApplication {
         }
 
         // Check if head hits screen bounds
-        double headX = snakePlayer.getSnakeUnits().getFirst().getX();
-        double headY = snakePlayer.getSnakeUnits().getFirst().getY();
+        double headX = snakePlayer.snakeHeadX();
+        double headY = snakePlayer.snakeHeadY();
         if (headX < 0 || headX >= SCREEN_WIDTH || headY < 0 || headY >= SCREEN_HEIGHT) {
             gameOver();
             return;
@@ -136,6 +167,16 @@ public class SnakeApplication extends GameApplication {
                 return;
             }
         }
+
+        // Check if head hits an item (apple...) -> kinda a collision system
+        if (appleItem != null) {
+           double appleX = appleItem.itemY(appleItem);
+           double appleY = appleItem.itemX(appleItem);
+
+           if (headX == appleX && headY == appleY) {
+               bodyParts++;
+           }
+        }
     }
 
     @Override
@@ -145,27 +186,26 @@ public class SnakeApplication extends GameApplication {
 
     // Custom check "collision" -> check the position of CollectibleItem and Snake
 
+    @Override
+    protected void initPhysics() {
+        FXGL.getPhysicsWorld().addCollisionHandler(new CollisionHandler(EntityType.PLAYER, EntityType.APPLE) {
 
-//    @Override
-    ////    protected void initPhysics() {
-    ////        FXGL.getPhysicsWorld().addCollisionHandler(new CollisionHandler(EntityType.PLAYER, EntityType.APPLE) {
-    ////
-    ////            @Override
-    ////            protected void onCollisionBegin(Entity player, Entity apple) {
-    ////                // Collision counts only if it's the head [0]
-    ////                if (player != snakePlayer.getSnakeUnits().getFirst()) return;
-    ////
-    ////                FXGL.inc("applesEatenFXGL", +1);
-    ////                apple.removeFromWorld();
-    ////
-    ////                snakePlayer.snakeAddUnits(bodyParts, UNIT_SIZE);
-    ////                bodyParts++;
-    ////
-    ////                gameSpeed = Math.max(gameSpeed - 0.01, 0.05);
-    ////                appleItem.createApple(SCREEN_WIDTH, SCREEN_WIDTH, UNIT_SIZE);
-    ////            }
-    ////        });
-    ////    }
+            @Override
+            protected void onCollisionBegin(Entity player, Entity apple) {
+                // Collision counts only if it's the head [0]
+                if (player != snakePlayer.getSnakeUnits().getFirst()) return;
+
+                FXGL.inc("applesEatenFXGL", +1);
+                apple.removeFromWorld();
+
+                snakePlayer.snakeAddUnits(bodyParts, UNIT_SIZE);
+                bodyParts++;
+
+                gameSpeed = Math.max(gameSpeed - 0.01, 0.05);
+                appleItem.createApple(SCREEN_WIDTH, SCREEN_WIDTH, UNIT_SIZE);
+            }
+        });
+    }
 
     @Override
     protected void initUI() {

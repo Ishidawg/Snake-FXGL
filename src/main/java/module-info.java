@@ -1,4 +1,4 @@
-module com.ishidaw.snakefxgl {
+open module com.ishidaw.snakefxgl {
     requires javafx.controls;
     requires javafx.fxml;
 
@@ -6,6 +6,5 @@ module com.ishidaw.snakefxgl {
     requires com.almasb.fxgl.entity;
     requires javafx.graphics;
 
-    opens com.ishidaw.snakefxgl to javafx.fxml;
     exports com.ishidaw.snakefxgl;
 }
