@@ -124,10 +124,11 @@ public class SnakeApplication extends GameApplication {
     }
 
     private void moveOneStep() {
-        // Save the previous head position, so I can use it later to move the body segments
-        double prevX = snakePlayer.snakeHeadX();
-        double prevY = snakePlayer.snakeHeadY();
+        checkSnakeCollision();
+        checkItemCollision(appleItem, snakePlayer);
+    }
 
+    public void directions() {
         switch (direction) {
             case "Up": snakePlayer.getSnakeUnits().getFirst().translateY(-UNIT_SIZE); break;
             case "Down": snakePlayer.getSnakeUnits().getFirst().translateY(UNIT_SIZE); break;
@@ -135,6 +136,14 @@ public class SnakeApplication extends GameApplication {
             case "Right": snakePlayer.getSnakeUnits().getFirst().translateX(UNIT_SIZE); break;
             default: break;
         }
+    }
+
+    public void checkSnakeCollision() {
+        // Save the previous head position, so I can use it later to move the body segments
+        double prevX = snakePlayer.snakeHeadX();
+        double prevY = snakePlayer.snakeHeadY();
+
+        directions();
 
         // Use the head position to move each body part onto it
         for (int i = 1; i < bodyParts; i++) {
@@ -160,8 +169,6 @@ public class SnakeApplication extends GameApplication {
                 return;
             }
         }
-
-        checkItemCollision(appleItem, snakePlayer);
     }
 
     public void checkItemCollision(CollectibleItems item, Snake snake) {
