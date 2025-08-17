@@ -2,7 +2,6 @@ package com.ishidaw.snakefxgl;
 
 import com.almasb.fxgl.app.GameApplication;
 import com.almasb.fxgl.app.GameSettings;
-import com.almasb.fxgl.app.scene.FXGLScene;
 import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.entity.Entity;
 import com.almasb.fxgl.physics.CollisionHandler;
@@ -10,7 +9,6 @@ import com.ishidaw.snakefxgl.Entities.CollectibleItems;
 import com.ishidaw.snakefxgl.Entities.Snake;
 import javafx.scene.input.KeyCode;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 
 import java.util.Map;
@@ -55,7 +53,7 @@ public class SnakeApplication extends GameApplication {
     protected void initGame() {
         initBackground();
         snakePlayer.createSnake(bodyParts, SCREEN_WIDTH, SCREEN_HEIGHT, UNIT_SIZE);
-        appleItem.createApple(SCREEN_WIDTH, SCREEN_WIDTH, UNIT_SIZE);
+        appleItem.createApple(SCREEN_WIDTH, SCREEN_HEIGHT, UNIT_SIZE, EntityType.ITEM, "jewel.png");
     }
 
     // default angle 180
@@ -129,9 +127,6 @@ public class SnakeApplication extends GameApplication {
 
     private void moveOneStep() {
         // Save the previous head position, so I can use it later to move the body segments
-        // double prevX = snakePlayer.getSnakeUnits().getFirst().getX();
-        // double prevY = snakePlayer.getSnakeUnits().getFirst().getY();
-
         double prevX = snakePlayer.snakeHeadX();
         double prevY = snakePlayer.snakeHeadY();
 
@@ -168,14 +163,26 @@ public class SnakeApplication extends GameApplication {
             }
         }
 
-        // Check if head hits an item (apple...) -> kinda a collision system
-        if (appleItem != null) {
-           double appleX = appleItem.itemY(appleItem);
-           double appleY = appleItem.itemX(appleItem);
+        checkItemCollision(appleItem, snakePlayer);
+    }
 
-           if (headX == appleX && headY == appleY) {
-               bodyParts++;
-           }
+    public void checkItemCollision(CollectibleItems item, Snake snake) {
+        double itemX = item.itemX();
+        double itemY = item.itemY();
+
+        double snakeX = snake.snakeHeadX();
+        double snakeY = snake.snakeHeadY();
+
+        if (itemX == snakeX && itemY == snakeY) {
+            item.removeItem();
+            item.createApple(SCREEN_WIDTH, SCREEN_HEIGHT, UNIT_SIZE, EntityType.ITEM, "jewel.png");
+
+            FXGL.inc("applesEatenFXGL", +1);
+
+            snake.growSnake(bodyParts);
+            bodyParts++;
+
+            gameSpeed = Math.max(gameSpeed - 0.01, 0.03);
         }
     }
 
@@ -184,35 +191,12 @@ public class SnakeApplication extends GameApplication {
         vars.put("applesEatenFXGL", applesEaten);
     }
 
-    // Custom check "collision" -> check the position of CollectibleItem and Snake
-
-    @Override
-    protected void initPhysics() {
-        FXGL.getPhysicsWorld().addCollisionHandler(new CollisionHandler(EntityType.PLAYER, EntityType.APPLE) {
-
-            @Override
-            protected void onCollisionBegin(Entity player, Entity apple) {
-                // Collision counts only if it's the head [0]
-                if (player != snakePlayer.getSnakeUnits().getFirst()) return;
-
-                FXGL.inc("applesEatenFXGL", +1);
-                apple.removeFromWorld();
-
-                snakePlayer.snakeAddUnits(bodyParts, UNIT_SIZE);
-                bodyParts++;
-
-                gameSpeed = Math.max(gameSpeed - 0.01, 0.05);
-                appleItem.createApple(SCREEN_WIDTH, SCREEN_WIDTH, UNIT_SIZE);
-            }
-        });
-    }
-
     @Override
     protected void initUI() {
         Text scoreLabel = new Text();
         scoreLabel.setScaleX(2);
         scoreLabel.setScaleY(2);
-        scoreLabel.setFill(Color.BLACK);
+        scoreLabel.setFill(Color.WHITE);
         scoreLabel.setTranslateX((SCREEN_WIDTH - scoreLabel.getLayoutBounds().getWidth()) / 2);
         scoreLabel.setTranslateY(20);
 
@@ -231,7 +215,7 @@ public class SnakeApplication extends GameApplication {
         Text gameOverText = new Text("GAME OVER!");
         gameOverText.setScaleX(2);
         gameOverText.setScaleY(2);
-        gameOverText.setFill(Color.BLACK);
+        gameOverText.setFill(Color.WHITE);
         gameOverText.setTranslateX((SCREEN_WIDTH - gameOverText.getLayoutBounds().getWidth()) / 2);
         gameOverText.setTranslateY(SCREEN_HEIGHT / 2);
         FXGL.getGameScene().addUINode(gameOverText);

@@ -13,9 +13,9 @@ public class Snake {
     private Entity snake;
     private final List<Entity> snakeUnits = new ArrayList<>();
 
-    public List<Entity> getSnakeUnits() {
-        return snakeUnits;
-    }
+//    static final int DEFAULT_BODY_PARTS = 1;
+////    int bodyParts = DEFAULT_BODY_PARTS;
+//    static final int UNIT_SIZE = 32; // Cell size
 
     public void createSnake(int bodyParts, int SCREEN_WIDTH, int SCREEN_HEIGHT, int UNIT_SIZE) {
         for (int i = 0; i < bodyParts; i++) {
@@ -25,30 +25,38 @@ public class Snake {
                     .viewWithBBox("snake_head.png")
                     .with(new CollidableComponent(true))
                     .buildAndAttach();
-            snakeUnits.add(segment);
+            getSnakeUnits().add(segment);
         }
 
         // Means that the snakeUnits[0] is the "head" -> snake
-        snake = snakeUnits.getFirst();
+        snake = getSnakeUnits().getFirst();
         snake.setRotation(270);
     }
 
-    public void snakeAddUnits(int bodyParts, int UNIT_SIZE) {
+    public void snakeAddUnits(int bodyParts) {
         Entity newSegment = FXGL.entityBuilder()
                 .type(EntityType.PLAYER)
-                .at(snakeUnits.get(bodyParts - 1).getX(), snakeUnits.get(bodyParts - 1).getY())
+                .at(getSnakeUnits().get(bodyParts - 1).getX(), getSnakeUnits().get(bodyParts - 1).getY())
                 .viewWithBBox("snake_body.png")
                 .with(new CollidableComponent(true))
                 .buildAndAttach();
-        snakeUnits.add(newSegment);
+        getSnakeUnits().add(newSegment);
+    }
+
+    public List<Entity> getSnakeUnits() {
+        return this.snakeUnits;
     }
 
     public void removeSnake() {
-        snake.removeFromWorld();
+        this.snake.removeFromWorld();
     }
 
     public void setSnakeHead(double angle) {
-        snake.setRotation(angle);
+        this.snake.setRotation(angle);
+    }
+
+    public void growSnake(int bodyParts) {
+        snakeAddUnits(bodyParts);
     }
 
     public double snakeHeadX() {
