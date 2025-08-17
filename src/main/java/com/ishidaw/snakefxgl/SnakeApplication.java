@@ -5,6 +5,7 @@ import com.almasb.fxgl.app.GameSettings;
 import com.almasb.fxgl.dsl.FXGL;
 import com.ishidaw.snakefxgl.Entities.CollectibleItems;
 import com.ishidaw.snakefxgl.Entities.Snake;
+import com.ishidaw.snakefxgl.Utils.Hud;
 import javafx.scene.input.KeyCode;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
@@ -19,6 +20,7 @@ public class SnakeApplication extends GameApplication {
 
     Snake snakePlayer = new Snake();
     CollectibleItems appleItem = new CollectibleItems();
+    Hud hud = new Hud();
 
     // assets are 32x32, so it NEEDS to be multiple of 2 (32 * 20).
     // bunch of constants
@@ -198,16 +200,7 @@ public class SnakeApplication extends GameApplication {
 
     @Override
     protected void initUI() {
-        Text scoreLabel = new Text();
-        scoreLabel.setScaleX(2);
-        scoreLabel.setScaleY(2);
-        scoreLabel.setFill(Color.WHITE);
-        scoreLabel.setTranslateX((SCREEN_WIDTH - scoreLabel.getLayoutBounds().getWidth()) / 2);
-        scoreLabel.setTranslateY(20);
-
-        scoreLabel.textProperty().bind(getWorldProperties().intProperty("applesEatenFXGL").asString());
-
-        FXGL.getGameScene().addUINode(scoreLabel);
+        hud.defaultHUD(SCREEN_WIDTH);
     }
 
     private void gameOver() {
@@ -217,12 +210,13 @@ public class SnakeApplication extends GameApplication {
 
         direction = " ";
 
-        Text gameOverText = new Text("GAME OVER!");
-        gameOverText.setScaleX(2);
-        gameOverText.setScaleY(2);
-        gameOverText.setFill(Color.WHITE);
-        gameOverText.setTranslateX((SCREEN_WIDTH - gameOverText.getLayoutBounds().getWidth()) / 2);
-        gameOverText.setTranslateY((double) SCREEN_HEIGHT / 2);
-        FXGL.getGameScene().addUINode(gameOverText);
+        hud.gameOverHUD(
+                SCREEN_WIDTH,
+                SCREEN_HEIGHT,
+                "GAME OVER!",
+                Color.GREEN,
+                2,
+                2
+        );
     }
 }
