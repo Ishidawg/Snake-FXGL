@@ -3,8 +3,6 @@ package com.ishidaw.snakefxgl;
 import com.almasb.fxgl.app.GameApplication;
 import com.almasb.fxgl.app.GameSettings;
 import com.almasb.fxgl.dsl.FXGL;
-import com.almasb.fxgl.entity.Entity;
-import com.almasb.fxgl.physics.CollisionHandler;
 import com.ishidaw.snakefxgl.Entities.CollectibleItems;
 import com.ishidaw.snakefxgl.Entities.Snake;
 import javafx.scene.input.KeyCode;
@@ -82,27 +80,27 @@ public class SnakeApplication extends GameApplication {
         // The running check is to ignore inputs if it's game over
         FXGL.onKey(KeyCode.W, () -> {
             if (!running) return;
-            if(snakePlayer.getSnakeUnits().getFirst().getPosition().getY() > 0 && direction != "Down") playerMovementUp();
+            if(snakePlayer.getSnakeUnits().getFirst().getPosition().getY() > 0 && !direction.equals("Down")) playerMovementUp();
         });
 
         FXGL.onKey(KeyCode.S, () -> {
             if (!running) return;
-            if(snakePlayer.getSnakeUnits().getFirst().getPosition().getY() < SCREEN_HEIGHT - UNIT_SIZE && direction != "Up") playerMovementDown();
+            if(snakePlayer.getSnakeUnits().getFirst().getPosition().getY() < SCREEN_HEIGHT - UNIT_SIZE && !direction.equals("Up")) playerMovementDown();
         });
 
         FXGL.onKey(KeyCode.D, () -> {
             if (!running) return;
-            if(snakePlayer.getSnakeUnits().getFirst().getPosition().getX() < SCREEN_WIDTH - UNIT_SIZE && direction != "Left") playerMovementRight();
+            if(snakePlayer.getSnakeUnits().getFirst().getPosition().getX() < SCREEN_WIDTH - UNIT_SIZE && !direction.equals("Left")) playerMovementRight();
         });
 
         FXGL.onKey(KeyCode.A, () -> {
             if (!running) return;
-            if(snakePlayer.getSnakeUnits().getFirst().getPosition().getX() > 0 && direction != "Right") playerMovementLeft();
+            if(snakePlayer.getSnakeUnits().getFirst().getPosition().getX() > 0 && !direction.equals("Right")) playerMovementLeft();
         });
     }
 
     @Override
-    protected void onUpdate(double tpf) { // tpf is apprx 0.0167, framelimit = 60
+    protected void onUpdate(double tpf) { // tpf is approx 0.0167, frame limit = 60
         if (!running) return;
 
         moveTimer += tpf;
@@ -120,7 +118,7 @@ public class SnakeApplication extends GameApplication {
     }
 
     public void initBackground() {
-        Entity bkg = FXGL.entityBuilder()
+        FXGL.entityBuilder()
                 .view("background.png")
                 .buildAndAttach();
     }
@@ -155,7 +153,7 @@ public class SnakeApplication extends GameApplication {
             return;
         }
 
-        // Check if head hits some bodypart
+        // Check if head hits some body part
         for (int i = 1; i < bodyParts; i++) {
             if (headX == snakePlayer.getSnakeUnits().get(i).getX() && headY == snakePlayer.getSnakeUnits().get(i).getY()) {
                 gameOver();
@@ -182,7 +180,7 @@ public class SnakeApplication extends GameApplication {
             snake.growSnake(bodyParts);
             bodyParts++;
 
-            gameSpeed = Math.max(gameSpeed - 0.01, 0.03);
+            gameSpeed = Math.max(gameSpeed - 0.01, 0.02);
         }
     }
 
@@ -217,7 +215,7 @@ public class SnakeApplication extends GameApplication {
         gameOverText.setScaleY(2);
         gameOverText.setFill(Color.WHITE);
         gameOverText.setTranslateX((SCREEN_WIDTH - gameOverText.getLayoutBounds().getWidth()) / 2);
-        gameOverText.setTranslateY(SCREEN_HEIGHT / 2);
+        gameOverText.setTranslateY((double) SCREEN_HEIGHT / 2);
         FXGL.getGameScene().addUINode(gameOverText);
     }
 }

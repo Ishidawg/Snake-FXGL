@@ -13,15 +13,11 @@ public class Snake {
     private Entity snake;
     private final List<Entity> snakeUnits = new ArrayList<>();
 
-//    static final int DEFAULT_BODY_PARTS = 1;
-////    int bodyParts = DEFAULT_BODY_PARTS;
-//    static final int UNIT_SIZE = 32; // Cell size
-
     public void createSnake(int bodyParts, int SCREEN_WIDTH, int SCREEN_HEIGHT, int UNIT_SIZE) {
         for (int i = 0; i < bodyParts; i++) {
             Entity segment = FXGL.entityBuilder()
                     .type(EntityType.PLAYER)
-                    .at(SCREEN_WIDTH / 2 - i * UNIT_SIZE, SCREEN_HEIGHT / 2)
+                    .at((double) SCREEN_WIDTH / 2 - i * UNIT_SIZE, (double) SCREEN_HEIGHT / 2)
                     .viewWithBBox("snake_head.png")
                     .with(new CollidableComponent(true))
                     .buildAndAttach();

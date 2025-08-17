@@ -7,4 +7,6 @@ open module com.ishidaw.snakefxgl {
     requires javafx.graphics;
 
     exports com.ishidaw.snakefxgl;
+    exports com.ishidaw.snakefxgl.Entities;
+    exports com.ishidaw.snakefxgl.Enums;
 }
