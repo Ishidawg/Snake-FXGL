@@ -1,5 +1,6 @@
 package com.ishidaw.snakefxgl;
 
+import com.almasb.fxgl.app.CursorInfo;
 import com.almasb.fxgl.app.GameApplication;
 import com.almasb.fxgl.app.GameSettings;
 import com.almasb.fxgl.dsl.FXGL;
@@ -32,6 +33,7 @@ public class SnakeApplication extends GameApplication {
 
     int applesEaten = DEFAULT_EATEN_APPLES;
     int bodyParts = DEFAULT_BODY_PARTS;
+    int updatedScore = 0;
 
     // Keeps snake under controlled speed
     private double moveTimer = 0; // Just iterate elapsed time
@@ -40,6 +42,9 @@ public class SnakeApplication extends GameApplication {
     boolean running = true;
     String direction = "Down"; // Start direction
 
+    // Need this to concatenate Score + updatedScore
+    Text mainHUD = hud.defaultHUD(SCREEN_WIDTH, 2, 2, updatedScore);
+
     @Override
     protected void initSettings(GameSettings settings) {
         settings.setWidth(SCREEN_WIDTH);
@@ -47,11 +52,15 @@ public class SnakeApplication extends GameApplication {
         settings.setVersion("");
         settings.setTitle("Snake");
         settings.setTicksPerSecond(60);
+        settings.setGameMenuEnabled(false);
+        settings.setMainMenuEnabled(false);
+        settings.setDefaultCursor(new CursorInfo("empty_cursor.png", 0, 0)); // I don't know how to set the cursor to invisible...
+        System.out.println(settings.getDefaultCursor());
     }
 
     @Override
     protected void initGame() {
-        initBackground();
+        hud.initBackground();
         snakePlayer.createSnake(bodyParts, SCREEN_WIDTH, SCREEN_HEIGHT, UNIT_SIZE);
         appleItem.createApple(SCREEN_WIDTH, SCREEN_HEIGHT, UNIT_SIZE, EntityType.ITEM, "jewel.png");
     }
@@ -104,7 +113,6 @@ public class SnakeApplication extends GameApplication {
     @Override
     protected void onUpdate(double tpf) { // tpf is approx 0.0167, frame limit = 60
         if (!running) return;
-
         moveTimer += tpf;
 
         int maxSteps = 5;
@@ -116,14 +124,15 @@ public class SnakeApplication extends GameApplication {
             moveOneStep();
             steps++;
         }
-
     }
 
-    public void initBackground() {
-        FXGL.entityBuilder()
-                .view("background.png")
-                .buildAndAttach();
+    public void setUpdatedScore() {
+        updatedScore = FXGL.geti("applesEatenFXGL");
+        hud.removeCustomHUD(mainHUD);
+        mainHUD = hud.defaultHUD(SCREEN_WIDTH, 2, 2, updatedScore);
+        hud.buildCustomHUD(mainHUD);
     }
+
 
     private void moveOneStep() {
         checkSnakeCollision();
@@ -186,6 +195,9 @@ public class SnakeApplication extends GameApplication {
 
             FXGL.inc("applesEatenFXGL", +1);
 
+            setUpdatedScore();
+
+
             snake.growSnake(bodyParts);
             bodyParts++;
 
@@ -200,7 +212,8 @@ public class SnakeApplication extends GameApplication {
 
     @Override
     protected void initUI() {
-        hud.defaultHUD(SCREEN_WIDTH);
+//        hud.defaultHUD(SCREEN_WIDTH, 2, 2, updatedScore);
+        hud.buildCustomHUD(mainHUD);
     }
 
     private void gameOver() {

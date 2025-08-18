@@ -1,12 +1,11 @@
 package com.ishidaw.snakefxgl.Utils;
 
 import com.almasb.fxgl.dsl.FXGL;
+import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 
-import static com.almasb.fxgl.dsl.FXGLForKtKt.getWorldProperties;
-
-public class Hud {
+public class Hud extends Node {
 
     public void initBackground() {
         FXGL.entityBuilder()
@@ -31,16 +30,32 @@ public class Hud {
         FXGL.getGameScene().addUINode(gameOverText);
     }
 
-    public void defaultHUD(int SCREEN_WIDTH) {
+    public Text defaultHUD(
+            int SCREEN_WIDTH,
+            int scaleX,
+            int scaleY,
+            int scoreUpdatedValue
+    ) {
+        StringBuilder finalScore = new StringBuilder();
         Text scoreLabel = new Text();
-        scoreLabel.setScaleX(2);
-        scoreLabel.setScaleY(2);
+        scoreLabel.setScaleX(scaleX);
+        scoreLabel.setScaleY(scaleY);
         scoreLabel.setFill(Color.WHITE);
         scoreLabel.setTranslateX((SCREEN_WIDTH - scoreLabel.getLayoutBounds().getWidth()) / 2);
         scoreLabel.setTranslateY(20);
 
-        scoreLabel.textProperty().bind(getWorldProperties().intProperty("applesEatenFXGL").asString());
+        finalScore.append("score: ").append(scoreUpdatedValue);
 
+        scoreLabel.setText(String.valueOf(finalScore));
+
+        return scoreLabel;
+    }
+
+    public void buildCustomHUD(Text scoreLabel) {
         FXGL.getGameScene().addUINode(scoreLabel);
     }
-}
+
+    public void removeCustomHUD(Text scoreLabel) {
+        FXGL.getGameScene().removeUINode(scoreLabel);
+    }
+ }
