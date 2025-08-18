@@ -17,8 +17,9 @@ public class Snake {
         for (int i = 0; i < bodyParts; i++) {
             Entity segment = FXGL.entityBuilder()
                     .type(EntityType.PLAYER)
+//                    .scale(2, 2)
                     .at((double) SCREEN_WIDTH / 2 - i * UNIT_SIZE, (double) SCREEN_HEIGHT / 2)
-                    .viewWithBBox("snake_head_vector.png")
+                    .viewWithBBox("snake_head.png")
                     .with(new CollidableComponent(true))
                     .buildAndAttach();
             getSnakeUnits().add(segment);
@@ -32,8 +33,9 @@ public class Snake {
     public void snakeAddUnits(int bodyParts) {
         Entity newSegment = FXGL.entityBuilder()
                 .type(EntityType.PLAYER)
+//                .scale(2, 2)
                 .at(getSnakeUnits().get(bodyParts - 1).getX(), getSnakeUnits().get(bodyParts - 1).getY())
-                .viewWithBBox("snake_body_vector.png")
+                .viewWithBBox("snake_body.png")
                 .with(new CollidableComponent(true))
                 .buildAndAttach();
         getSnakeUnits().add(newSegment);

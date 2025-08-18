@@ -27,7 +27,7 @@ public class SnakeApplication extends GameApplication {
     static final int SCREEN_HEIGHT = 1024;
     static final int DEFAULT_EATEN_APPLES = 0;
     static final int DEFAULT_BODY_PARTS = 1;
-    static final int UNIT_SIZE = 32; // Cell size
+    static final int UNIT_SIZE = 64; // Cell size
 
     int applesEaten = DEFAULT_EATEN_APPLES;
     int bodyParts = DEFAULT_BODY_PARTS;
@@ -35,7 +35,7 @@ public class SnakeApplication extends GameApplication {
 
     // Keeps snake under controlled speed
     private double moveTimer = 0; // Just iterate elapsed time
-    private double gameSpeed = 0.10; // Seconds between snakes moves
+    private double gameSpeed = 0.12; // Seconds between snakes moves
 
     boolean running = true;
     String direction = "Down"; // Start direction
@@ -106,6 +106,7 @@ public class SnakeApplication extends GameApplication {
             if (!running) return;
             if(snakePlayer.getSnakeUnits().getFirst().getPosition().getX() > 0 && !direction.equals("Right")) playerMovementLeft();
         });
+        FXGL.onKey(KeyCode.R, () -> System.out.println("RESTART!"));
     }
 
     @Override
@@ -113,7 +114,7 @@ public class SnakeApplication extends GameApplication {
         if (!running) return;
         moveTimer += tpf;
 
-        int maxSteps = 5;
+        int maxSteps = 10;
         int steps = 0;
 
 //         This is the "auto movement" behind the snake, and how speedy is based on the while loop within the Move Timer and GameSpeed
@@ -167,14 +168,16 @@ public class SnakeApplication extends GameApplication {
         double headX = snakePlayer.snakeHeadX();
         double headY = snakePlayer.snakeHeadY();
         if (headX < 0 || headX >= SCREEN_WIDTH || headY < 0 || headY >= SCREEN_HEIGHT) {
-            gameOver();
+//            gameOver();
+            System.out.println("dead");
             return;
         }
 
         // Check if head hits some body part
         for (int i = 1; i < bodyParts; i++) {
             if (headX == snakePlayer.getSnakeUnits().get(i).getX() && headY == snakePlayer.getSnakeUnits().get(i).getY()) {
-                gameOver();
+//                gameOver();
+                System.out.println("dead");
                 return;
             }
         }
@@ -195,11 +198,10 @@ public class SnakeApplication extends GameApplication {
 
             setUpdatedScore();
 
-
             snake.growSnake(bodyParts);
             bodyParts++;
 
-            gameSpeed = Math.max(gameSpeed - 0.01, 0.02);
+            gameSpeed -= 0.001;
         }
     }
 
