@@ -15,8 +15,6 @@ import java.util.Map;
 
 import com.ishidaw.snakefxgl.Enums.EntityType;
 
-import static com.almasb.fxgl.dsl.FXGLForKtKt.getWorldProperties;
-
 public class SnakeApplication extends GameApplication {
 
     Snake snakePlayer = new Snake();
@@ -25,8 +23,8 @@ public class SnakeApplication extends GameApplication {
 
     // assets are 32x32, so it NEEDS to be multiple of 2 (32 * 20).
     // bunch of constants
-    static final int SCREEN_WIDTH = 512;
-    static final int SCREEN_HEIGHT = 512;
+    static final int SCREEN_WIDTH = 1024;
+    static final int SCREEN_HEIGHT = 1024;
     static final int DEFAULT_EATEN_APPLES = 0;
     static final int DEFAULT_BODY_PARTS = 1;
     static final int UNIT_SIZE = 32; // Cell size
@@ -62,7 +60,7 @@ public class SnakeApplication extends GameApplication {
     protected void initGame() {
         hud.initBackground();
         snakePlayer.createSnake(bodyParts, SCREEN_WIDTH, SCREEN_HEIGHT, UNIT_SIZE);
-        appleItem.createApple(SCREEN_WIDTH, SCREEN_HEIGHT, UNIT_SIZE, EntityType.ITEM, "jewel.png");
+        appleItem.createApple(SCREEN_WIDTH, SCREEN_HEIGHT, UNIT_SIZE, EntityType.ITEM, "apple.png");
     }
 
     // default angle 180
@@ -118,7 +116,7 @@ public class SnakeApplication extends GameApplication {
         int maxSteps = 5;
         int steps = 0;
 
-        // This is the "auto movement" behind the snake, and how speedy is based on the while loop within the Move Timer and GameSpeed
+//         This is the "auto movement" behind the snake, and how speedy is based on the while loop within the Move Timer and GameSpeed
         while (moveTimer >= gameSpeed && steps < maxSteps) {
             moveTimer -= gameSpeed;
             moveOneStep();
@@ -191,7 +189,7 @@ public class SnakeApplication extends GameApplication {
 
         if (itemX == snakeX && itemY == snakeY) {
             item.removeItem();
-            item.createApple(SCREEN_WIDTH, SCREEN_HEIGHT, UNIT_SIZE, EntityType.ITEM, "jewel.png");
+            item.createApple(SCREEN_WIDTH, SCREEN_HEIGHT, UNIT_SIZE, EntityType.ITEM, "apple.png");
 
             FXGL.inc("applesEatenFXGL", +1);
 
@@ -212,8 +210,7 @@ public class SnakeApplication extends GameApplication {
 
     @Override
     protected void initUI() {
-//        hud.defaultHUD(SCREEN_WIDTH, 2, 2, updatedScore);
-        hud.buildCustomHUD(mainHUD);
+        hud.buildCustomHUD(mainHUD); // Call through this function, so I can update the score value
     }
 
     private void gameOver() {

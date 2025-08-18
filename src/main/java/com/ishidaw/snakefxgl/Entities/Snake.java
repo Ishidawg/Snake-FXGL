@@ -18,7 +18,7 @@ public class Snake {
             Entity segment = FXGL.entityBuilder()
                     .type(EntityType.PLAYER)
                     .at((double) SCREEN_WIDTH / 2 - i * UNIT_SIZE, (double) SCREEN_HEIGHT / 2)
-                    .viewWithBBox("snake_head.png")
+                    .viewWithBBox("snake_head_vector.png")
                     .with(new CollidableComponent(true))
                     .buildAndAttach();
             getSnakeUnits().add(segment);
@@ -33,11 +33,11 @@ public class Snake {
         Entity newSegment = FXGL.entityBuilder()
                 .type(EntityType.PLAYER)
                 .at(getSnakeUnits().get(bodyParts - 1).getX(), getSnakeUnits().get(bodyParts - 1).getY())
-                .viewWithBBox("snake_body.png")
+                .viewWithBBox("snake_body_vector.png")
                 .with(new CollidableComponent(true))
                 .buildAndAttach();
         getSnakeUnits().add(newSegment);
-    }
+    }   
 
     public List<Entity> getSnakeUnits() {
         return this.snakeUnits;

@@ -9,7 +9,7 @@ public class Hud extends Node {
 
     public void initBackground() {
         FXGL.entityBuilder()
-                .view("background.png")
+                .view("vector_backgroud.png")
                 .buildAndAttach();
     }
 
