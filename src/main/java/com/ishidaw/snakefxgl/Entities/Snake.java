@@ -15,10 +15,12 @@ public class Snake {
 
     public void createSnake(int bodyParts, int SCREEN_WIDTH, int SCREEN_HEIGHT, int UNIT_SIZE) {
         for (int i = 0; i < bodyParts; i++) {
-            Entity segment = FXGL.entityBuilder()
+            String textureChoice = i == 0 ? "snake_head.png" : "snake_body.png";
+
+                    Entity segment = FXGL.entityBuilder()
                     .type(EntityType.PLAYER)
                     .at((double) SCREEN_WIDTH / 2 - i * UNIT_SIZE, (double) SCREEN_HEIGHT / 2)
-                    .viewWithBBox("snake_head.png")
+                    .viewWithBBox(textureChoice)
                     .with(new CollidableComponent(true))
                     .buildAndAttach();
             getSnakeUnits().add(segment);

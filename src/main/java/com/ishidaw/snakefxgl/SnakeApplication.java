@@ -3,8 +3,8 @@ package com.ishidaw.snakefxgl;
 import com.almasb.fxgl.app.CursorInfo;
 import com.almasb.fxgl.app.GameApplication;
 import com.almasb.fxgl.app.GameSettings;
-import com.almasb.fxgl.audio.Music;
 import com.almasb.fxgl.dsl.FXGL;
+import com.almasb.fxgl.entity.Entity;
 import com.ishidaw.snakefxgl.Entities.CollectibleItems;
 import com.ishidaw.snakefxgl.Entities.Snake;
 import com.ishidaw.snakefxgl.Utils.Hud;
@@ -24,21 +24,23 @@ public class SnakeApplication extends GameApplication {
     Hud hud = new Hud();
     Play play = new Play();
 
-    // assets are 32x32, so it NEEDS to be multiple of 2 (32 * 20).
     // bunch of constants
     static final int SCREEN_WIDTH = 1024;
     static final int SCREEN_HEIGHT = 1024;
     static final int DEFAULT_EATEN_APPLES = 0;
-    static final int DEFAULT_BODY_PARTS = 1;
+    static final int DEFAULT_BODY_PARTS = 4;
     static final int UNIT_SIZE = 64; // Cell size
+    static final int DEFAULT_SCORE = 0;
+    static final double DEFAULT_TIMER = 0;
+    static final double DEFAULT_SPEED = 0.12;
 
     int applesEaten = DEFAULT_EATEN_APPLES;
     int bodyParts = DEFAULT_BODY_PARTS;
-    int updatedScore = 0;
+    int updatedScore = DEFAULT_SCORE;
 
     // Keeps snake under controlled speed
-    private double moveTimer = 0; // Just iterate elapsed time
-    private double gameSpeed = 0.12; // Seconds between snakes moves
+    private double moveTimer = DEFAULT_TIMER; // Just iterate elapsed time
+    private double gameSpeed = DEFAULT_SPEED; // Seconds between snakes moves
 
     boolean running = true;
     String direction = "Down"; // Start direction
@@ -63,7 +65,7 @@ public class SnakeApplication extends GameApplication {
     protected void initGame() {
         hud.initBackground();
         snakePlayer.createSnake(bodyParts, SCREEN_WIDTH, SCREEN_HEIGHT, UNIT_SIZE);
-        appleItem.createApple(SCREEN_WIDTH, SCREEN_HEIGHT, UNIT_SIZE, EntityType.ITEM, "apple.png");
+        appleItem.createApple(SCREEN_WIDTH, SCREEN_HEIGHT, UNIT_SIZE, EntityType.ITEM, "apple.png", snakePlayer);
         play.playBGM("soundtrack.wav");
     }
 
@@ -95,26 +97,26 @@ public class SnakeApplication extends GameApplication {
     @Override
     protected void initInput() {
         // The running check is to ignore inputs if it's game over
-        FXGL.onKey(KeyCode.W, () -> {
+        FXGL.onKeyDown(KeyCode.W, () -> {
             if (!running) return;
             if(snakePlayer.getSnakeUnits().getFirst().getPosition().getY() > 0 && !direction.equals("Down")) playerMovementUp();
         });
 
-        FXGL.onKey(KeyCode.S, () -> {
+        FXGL.onKeyDown(KeyCode.S, () -> {
             if (!running) return;
             if(snakePlayer.getSnakeUnits().getFirst().getPosition().getY() < SCREEN_HEIGHT - UNIT_SIZE && !direction.equals("Up")) playerMovementDown();
         });
 
-        FXGL.onKey(KeyCode.D, () -> {
+        FXGL.onKeyDown(KeyCode.D, () -> {
             if (!running) return;
             if(snakePlayer.getSnakeUnits().getFirst().getPosition().getX() < SCREEN_WIDTH - UNIT_SIZE && !direction.equals("Left")) playerMovementRight();
         });
 
-        FXGL.onKey(KeyCode.A, () -> {
+        FXGL.onKeyDown(KeyCode.A, () -> {
             if (!running) return;
             if(snakePlayer.getSnakeUnits().getFirst().getPosition().getX() > 0 && !direction.equals("Right")) playerMovementLeft();
         });
-        FXGL.onKey(KeyCode.R, () -> System.out.println("RESTART!"));
+        FXGL.onKeyDown(KeyCode.R, this::restartGame);
     }
 
     @Override
@@ -125,7 +127,7 @@ public class SnakeApplication extends GameApplication {
         int maxSteps = 10;
         int steps = 0;
 
-//         This is the "auto movement" behind the snake, and how speedy is based on the while loop within the Move Timer and GameSpeed
+        // This is the "auto movement" behind the snake, and how speedy is based on the while loop within the Move Timer and GameSpeed
         while (moveTimer >= gameSpeed && steps < maxSteps) {
             moveTimer -= gameSpeed;
             moveOneStep();
@@ -139,7 +141,6 @@ public class SnakeApplication extends GameApplication {
         mainHUD = hud.defaultHUD(SCREEN_WIDTH, 2, 2, updatedScore);
         hud.buildCustomHUD(mainHUD);
     }
-
 
     private void moveOneStep() {
         checkSnakeCollision();
@@ -176,16 +177,16 @@ public class SnakeApplication extends GameApplication {
         double headX = snakePlayer.snakeHeadX();
         double headY = snakePlayer.snakeHeadY();
         if (headX < 0 || headX >= SCREEN_WIDTH || headY < 0 || headY >= SCREEN_HEIGHT) {
-//            gameOver();
-            System.out.println("dead");
+            gameOver();
+            FXGL.play("hit.wav");
             return;
         }
 
         // Check if head hits some body part
         for (int i = 1; i < bodyParts; i++) {
             if (headX == snakePlayer.getSnakeUnits().get(i).getX() && headY == snakePlayer.getSnakeUnits().get(i).getY()) {
-//                gameOver();
-                System.out.println("dead");
+                gameOver();
+                FXGL.play("hit.wav");
                 return;
             }
         }
@@ -200,7 +201,7 @@ public class SnakeApplication extends GameApplication {
 
         if (itemX == snakeX && itemY == snakeY) {
             item.removeItem();
-            item.createApple(SCREEN_WIDTH, SCREEN_HEIGHT, UNIT_SIZE, EntityType.ITEM, "apple.png");
+            item.createApple(SCREEN_WIDTH, SCREEN_HEIGHT, UNIT_SIZE, EntityType.ITEM, "apple.png", snakePlayer);
 
             FXGL.inc("applesEatenFXGL", +1);
 
@@ -223,12 +224,16 @@ public class SnakeApplication extends GameApplication {
         hud.buildCustomHUD(mainHUD); // Call through this function, so I can update the score value
     }
 
+    // I was pretending to have the gameOver and restarGame inside a class GameState, but was resulting in a cyclic dependence
+    // I'm not proud of this...
     private void gameOver() {
         running = false;
 
         snakePlayer.removeSnake();
 
         direction = " ";
+
+        play.stopBGM();
 
         hud.gameOverHUD(
                 SCREEN_WIDTH,
@@ -238,5 +243,33 @@ public class SnakeApplication extends GameApplication {
                 2,
                 2
         );
+    }
+
+    private void restartGame() {
+        FXGL.getGameWorld().getEntitiesCopy().forEach(Entity::removeFromWorld);
+
+        running = true;
+        moveTimer = DEFAULT_TIMER;
+        gameSpeed = DEFAULT_SPEED;
+
+        updatedScore = DEFAULT_SCORE;
+        applesEaten = DEFAULT_EATEN_APPLES;
+        bodyParts = DEFAULT_BODY_PARTS;
+        direction = "Down";
+
+        FXGL.set("applesEatenFXGL", DEFAULT_SCORE);
+
+        hud.initBackground();
+        snakePlayer = new Snake();
+        snakePlayer.createSnake(bodyParts, SCREEN_WIDTH, SCREEN_HEIGHT, UNIT_SIZE);
+
+        appleItem = new CollectibleItems();
+        appleItem.createApple(SCREEN_WIDTH, SCREEN_HEIGHT, UNIT_SIZE, EntityType.ITEM, "apple.png", snakePlayer);
+
+        play.playBGM("soundtrack.wav");
+
+        hud.removeCustomHUD(mainHUD);
+        mainHUD = hud.defaultHUD(SCREEN_WIDTH, 2, 2, updatedScore);
+        hud.buildCustomHUD(mainHUD);
     }
 }

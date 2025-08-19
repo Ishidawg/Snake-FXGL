@@ -9,4 +9,8 @@ public class Play {
         Music bgm = FXGL.getAssetLoader().loadMusic(music);
         FXGL.getAudioPlayer().loopMusic(bgm);
     }
+
+    public void stopBGM() {
+        FXGL.getAudioPlayer().stopAllMusic();
+    }
 }
