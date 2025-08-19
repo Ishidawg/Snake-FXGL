@@ -3,10 +3,12 @@ package com.ishidaw.snakefxgl;
 import com.almasb.fxgl.app.CursorInfo;
 import com.almasb.fxgl.app.GameApplication;
 import com.almasb.fxgl.app.GameSettings;
+import com.almasb.fxgl.audio.Music;
 import com.almasb.fxgl.dsl.FXGL;
 import com.ishidaw.snakefxgl.Entities.CollectibleItems;
 import com.ishidaw.snakefxgl.Entities.Snake;
 import com.ishidaw.snakefxgl.Utils.Hud;
+import com.ishidaw.snakefxgl.Utils.Play;
 import javafx.scene.input.KeyCode;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
@@ -20,6 +22,7 @@ public class SnakeApplication extends GameApplication {
     Snake snakePlayer = new Snake();
     CollectibleItems appleItem = new CollectibleItems();
     Hud hud = new Hud();
+    Play play = new Play();
 
     // assets are 32x32, so it NEEDS to be multiple of 2 (32 * 20).
     // bunch of constants
@@ -61,27 +64,32 @@ public class SnakeApplication extends GameApplication {
         hud.initBackground();
         snakePlayer.createSnake(bodyParts, SCREEN_WIDTH, SCREEN_HEIGHT, UNIT_SIZE);
         appleItem.createApple(SCREEN_WIDTH, SCREEN_HEIGHT, UNIT_SIZE, EntityType.ITEM, "apple.png");
+        play.playBGM("soundtrack.wav");
     }
 
     // default angle 180
     public void playerMovementUp() {
         direction = "Up";
         snakePlayer.setSnakeHead(90);
+        snakePlayer.setSnakeBody(90);
     }
 
     public void playerMovementDown() {
         direction = "Down";
         snakePlayer.setSnakeHead(270);
+        snakePlayer.setSnakeBody(270);
     }
 
     public void playerMovementRight() {
         direction = "Right";
         snakePlayer.setSnakeHead(180);
+        snakePlayer.setSnakeBody(180);
     }
 
     public void playerMovementLeft() {
         direction = "Left";
         snakePlayer.setSnakeHead(360);
+        snakePlayer.setSnakeBody(360);
     }
 
     @Override
