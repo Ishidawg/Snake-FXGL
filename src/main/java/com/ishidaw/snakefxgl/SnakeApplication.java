@@ -10,7 +10,6 @@ import com.ishidaw.snakefxgl.Entities.Snake;
 import com.ishidaw.snakefxgl.Utils.Hud;
 import com.ishidaw.snakefxgl.Utils.Play;
 import javafx.scene.input.KeyCode;
-import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 
 import java.util.Map;
@@ -45,8 +44,8 @@ public class SnakeApplication extends GameApplication {
     boolean running = true;
     String direction = "Down"; // Start direction
 
-    // Need this to concatenate Score + updatedScore
-    Text mainHUD = hud.defaultHUD(SCREEN_WIDTH, 2, 2, updatedScore);
+    // Need this right bellow to concatenate Score + updatedScore
+    Text mainHUD = hud.defaultHUD(SCREEN_WIDTH, updatedScore);
 
     @Override
     protected void initSettings(GameSettings settings) {
@@ -58,7 +57,6 @@ public class SnakeApplication extends GameApplication {
         settings.setGameMenuEnabled(false);
         settings.setMainMenuEnabled(false);
         settings.setDefaultCursor(new CursorInfo("empty_cursor.png", 0, 0)); // I don't know how to set the cursor to invisible...
-        System.out.println(settings.getDefaultCursor());
     }
 
     @Override
@@ -116,7 +114,9 @@ public class SnakeApplication extends GameApplication {
             if (!running) return;
             if(snakePlayer.getSnakeUnits().getFirst().getPosition().getX() > 0 && !direction.equals("Right")) playerMovementLeft();
         });
-        FXGL.onKeyDown(KeyCode.R, this::restartGame);
+        FXGL.onKeyDown(KeyCode.R, () -> {
+            if (!running) restartGame();
+        });
     }
 
     @Override
@@ -138,7 +138,7 @@ public class SnakeApplication extends GameApplication {
     public void setUpdatedScore() {
         updatedScore = FXGL.geti("applesEatenFXGL");
         hud.removeCustomHUD(mainHUD);
-        mainHUD = hud.defaultHUD(SCREEN_WIDTH, 2, 2, updatedScore);
+        mainHUD = hud.defaultHUD(SCREEN_WIDTH, updatedScore);
         hud.buildCustomHUD(mainHUD);
     }
 
@@ -235,14 +235,7 @@ public class SnakeApplication extends GameApplication {
 
         play.stopBGM();
 
-        hud.gameOverHUD(
-                SCREEN_WIDTH,
-                SCREEN_HEIGHT,
-                "GAME OVER!",
-                Color.GREEN,
-                2,
-                2
-        );
+        hud.gameOverHUD();
     }
 
     private void restartGame() {
@@ -269,7 +262,7 @@ public class SnakeApplication extends GameApplication {
         play.playBGM("soundtrack.wav");
 
         hud.removeCustomHUD(mainHUD);
-        mainHUD = hud.defaultHUD(SCREEN_WIDTH, 2, 2, updatedScore);
+        mainHUD = hud.defaultHUD(SCREEN_WIDTH, updatedScore);
         hud.buildCustomHUD(mainHUD);
     }
 }
