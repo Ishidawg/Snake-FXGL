@@ -42,6 +42,7 @@ public class SnakeApplication extends GameApplication {
     private double gameSpeed = DEFAULT_SPEED; // Seconds between snakes moves
 
     boolean running = true;
+    boolean isGameOver = false;
     String direction = "Down"; // Start direction
 
     // Need this right bellow to concatenate Score + updatedScore
@@ -117,6 +118,7 @@ public class SnakeApplication extends GameApplication {
         FXGL.onKeyDown(KeyCode.R, () -> {
             if (!running) restartGame();
         });
+        FXGL.onKeyDown(KeyCode.P, () -> { if (!isGameOver) pauseGame();});
     }
 
     @Override
@@ -228,6 +230,7 @@ public class SnakeApplication extends GameApplication {
     // I'm not proud of this...
     private void gameOver() {
         running = false;
+        isGameOver = true;
 
         snakePlayer.removeSnake();
 
@@ -242,6 +245,7 @@ public class SnakeApplication extends GameApplication {
         FXGL.getGameWorld().getEntitiesCopy().forEach(Entity::removeFromWorld);
 
         running = true;
+        isGameOver = false;
         moveTimer = DEFAULT_TIMER;
         gameSpeed = DEFAULT_SPEED;
 
@@ -264,5 +268,9 @@ public class SnakeApplication extends GameApplication {
         hud.removeCustomHUD(mainHUD);
         mainHUD = hud.defaultHUD(SCREEN_WIDTH, updatedScore);
         hud.buildCustomHUD(mainHUD);
+    }
+
+    private void pauseGame() {
+        running = running ? false : true;
     }
 }
