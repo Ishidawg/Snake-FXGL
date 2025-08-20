@@ -13,24 +13,27 @@ public class CollectibleItems extends Entity {
     Random random = new Random();
     private Entity item;
 
-    public void createApple(int SCREEN_WIDTH, int SCREEN_HEIGHT, int UNIT_SIZE, EntityType entityType, String texture, Snake snake) {
+    public void createApple(EntityType entityType, String texture, Snake snake) {
         var applePosition = new Object() {
             int appleX = 0;
             int appleY = 0;
         };
 
-        // My brain huts...
-        int[] appleYRange = {64, 128, 192, 256, 320, 384, 448, 512, 576, 640, 704, 768, 832, 896, 960, 1024};
-
         boolean onSnake;
 
+        // just get a random n where n in  [0, 16] * 64 + 64  by sooluckyseven
+
         do {
-            // (1024 / 64) * 64 = 1024
-            applePosition.appleX = random.nextInt(SCREEN_WIDTH / UNIT_SIZE) * UNIT_SIZE;
+
+            // Returns one of {64, 128, 192, 256, 320, 384, 448, 512, 576, 640, 704, 768, 832, 896, 960}
+            applePosition.appleX = random.nextInt(16) * 64;
 
             // Try to prevent to spawn on the first unit size of the screen height
-            int appleYRangeIndex = random.nextInt(appleYRange.length); // Pick a pseudo-random index of the array
-            applePosition.appleY = appleYRange[appleYRangeIndex];
+            // Need to take notes on this: random.nextInt(15) * 64 + 64 -> 64 to 960
+            // NextInt(15) means that I have 15 numbers, stating FROM 0 to 14
+            // Every number gets this: 0*0+64=64, 10*64+64=704 and so on until 14*64+64=960
+            // Returns one of {64, 128, 192, 256, 320, 384, 448, 512, 576, 640, 704, 768, 832, 896, 960}
+            applePosition.appleY = random.nextInt(15) * 64 + 64;
 
             // to ensure that an item (apple) will not spawn inside the snake
             onSnake = snake.getSnakeUnits().stream().anyMatch(segment ->

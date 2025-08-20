@@ -15,13 +15,9 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.text.Text;
 
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import com.ishidaw.snakefxgl.Enums.EntityType;
 import javafx.util.Duration;
-
-import static com.almasb.fxgl.dsl.FXGLForKtKt.getGameTimer;
-import static com.almasb.fxgl.dsl.FXGLForKtKt.runOnce;
 
 public class SnakeApplication extends GameApplication {
 
@@ -29,8 +25,6 @@ public class SnakeApplication extends GameApplication {
     CollectibleItems appleItem = new CollectibleItems();
     Hud hud = new Hud();
     Play play = new Play();
-
-    TimerAction timerAction;
 
     // bunch of constants
     static final int SCREEN_WIDTH = 1024;
@@ -56,7 +50,6 @@ public class SnakeApplication extends GameApplication {
 
     boolean isCountingDown = true;
     int countdown = DEFAULT_COUNTDOWN;
-    int countdownTimer = (int) DEFAULT_TIMER;
 
     String direction = "Down"; // Start direction
 
@@ -87,7 +80,7 @@ public class SnakeApplication extends GameApplication {
         setCountingDown();
 
         snakePlayer.createSnake(bodyParts, SCREEN_WIDTH, SCREEN_HEIGHT, UNIT_SIZE);
-        appleItem.createApple(SCREEN_WIDTH, SCREEN_HEIGHT, UNIT_SIZE, EntityType.ITEM, "apple.png", snakePlayer);
+        appleItem.createApple(EntityType.ITEM, "apple.png", snakePlayer);
         play.playBGM("soundtrack.wav");
 
         // Built the countdown the first time
@@ -143,7 +136,7 @@ public class SnakeApplication extends GameApplication {
             if(snakePlayer.getSnakeUnits().getFirst().getPosition().getX() > 0 && !direction.equals("Right")) playerMovementLeft();
         });
         FXGL.onKeyDown(KeyCode.R, () -> {
-            if (!running) restartGame();
+            if (!running && !isCountingDown) restartGame();
         });
         FXGL.onKeyDown(KeyCode.P, () -> { if (!isGameOver) pauseGame();});
     }
@@ -230,7 +223,7 @@ public class SnakeApplication extends GameApplication {
 
         if (itemX == snakeX && itemY == snakeY) {
             item.removeItem();
-            item.createApple(SCREEN_WIDTH, SCREEN_HEIGHT, UNIT_SIZE, EntityType.ITEM, "apple.png", snakePlayer);
+            item.createApple(EntityType.ITEM, "apple.png", snakePlayer);
 
             FXGL.inc("applesEatenFXGL", +1);
 
@@ -289,7 +282,7 @@ public class SnakeApplication extends GameApplication {
         snakePlayer.createSnake(bodyParts, SCREEN_WIDTH, SCREEN_HEIGHT, UNIT_SIZE);
 
         appleItem = new CollectibleItems();
-        appleItem.createApple(SCREEN_WIDTH, SCREEN_HEIGHT, UNIT_SIZE, EntityType.ITEM, "apple.png", snakePlayer);
+        appleItem.createApple(EntityType.ITEM, "apple.png", snakePlayer);
 
         play.playBGM("soundtrack.wav");
 
@@ -323,6 +316,7 @@ public class SnakeApplication extends GameApplication {
             fadeOut.setOnFinished(e -> {
                 hud.removeCustomHUD(countHUD);
                 running = true;
+                isCountingDown = false;
 
                 countHUD.setOpacity(1.0); // Need to re-set the opacity, cuz it holds the state, if dont, the restar cuntdown will not work
             });
