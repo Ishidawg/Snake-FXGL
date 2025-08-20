@@ -1,5 +1,6 @@
 package com.ishidaw.snakefxgl.Entities;
 
+import com.almasb.fxgl.core.collection.Array;
 import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.entity.Entity;
 import com.almasb.fxgl.entity.components.CollidableComponent;
@@ -18,11 +19,18 @@ public class CollectibleItems extends Entity {
             int appleY = 0;
         };
 
+        // My brain huts...
+        int[] appleYRange = {64, 128, 192, 256, 320, 384, 448, 512, 576, 640, 704, 768, 832, 896, 960, 1024};
+
         boolean onSnake;
 
         do {
+            // (1024 / 64) * 64 = 1024
             applePosition.appleX = random.nextInt(SCREEN_WIDTH / UNIT_SIZE) * UNIT_SIZE;
-            applePosition.appleY = random.nextInt(SCREEN_HEIGHT / UNIT_SIZE) * UNIT_SIZE;
+
+            // Try to prevent to spawn on the first unit size of the screen height
+            int appleYRangeIndex = random.nextInt(appleYRange.length); // Pick a pseudo-random index of the array
+            applePosition.appleY = appleYRange[appleYRangeIndex];
 
             // to ensure that an item (apple) will not spawn inside the snake
             onSnake = snake.getSnakeUnits().stream().anyMatch(segment ->

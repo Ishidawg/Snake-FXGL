@@ -9,6 +9,10 @@ import javafx.scene.text.Text;
 
 public class Hud extends Node {
 
+    // For some reason, just using the default Font.font("Gameplay.ttf") was not working AT ALL
+    // So I get the font directly from the source
+    Font gameFont = Font.loadFont(getClass().getResourceAsStream("/assets/ui/fonts/Gameplay.ttf"), 26);
+
     public void initBackground() {
         FXGL.entityBuilder()
                 .view("background.png")
@@ -21,15 +25,29 @@ public class Hud extends Node {
                 .buildAndAttach();
     }
 
+    public Text countdownHUD(int countdown, int SCREEN_WIDTH, int SCREEN_HEIGHT) {
+        Text counting = new Text();
+        counting.setScaleX(4);
+        counting.setScaleY(4);
+        counting.setFill(Color.WHITE);
+        counting.setFontSmoothingType(FontSmoothingType.LCD);
+        counting.setFont(Font.font(18));
+        counting.setTranslateX((SCREEN_WIDTH - counting.getLayoutBounds().getWidth()) / 2);
+        counting.setTranslateY((double) SCREEN_HEIGHT / 2);
+
+        counting.setFont(gameFont);
+        counting.setStroke(Color.BLACK);
+        counting.setStrokeWidth(1);
+
+        return counting;
+    }
+
     public Text defaultHUD(
             int SCREEN_WIDTH,
             int scoreUpdatedValue
     ) {
         StringBuilder finalScore = new StringBuilder();
         Text scoreLabel = new Text();
-        // For some reason, just using the default Font.font("Gameplay.ttf") was not working AT ALL
-        // So I get the font directly from the source
-        Font gameFont = Font.loadFont(getClass().getResourceAsStream("/assets/ui/fonts/Gameplay.ttf"), 26);
 
         scoreLabel.setScaleX(2);
         scoreLabel.setScaleY(2);

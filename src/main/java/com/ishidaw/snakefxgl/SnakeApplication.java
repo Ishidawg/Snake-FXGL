@@ -5,16 +5,23 @@ import com.almasb.fxgl.app.GameApplication;
 import com.almasb.fxgl.app.GameSettings;
 import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.entity.Entity;
+import com.almasb.fxgl.time.TimerAction;
 import com.ishidaw.snakefxgl.Entities.CollectibleItems;
 import com.ishidaw.snakefxgl.Entities.Snake;
 import com.ishidaw.snakefxgl.Utils.Hud;
 import com.ishidaw.snakefxgl.Utils.Play;
+import javafx.animation.FadeTransition;
 import javafx.scene.input.KeyCode;
 import javafx.scene.text.Text;
 
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import com.ishidaw.snakefxgl.Enums.EntityType;
+import javafx.util.Duration;
+
+import static com.almasb.fxgl.dsl.FXGLForKtKt.getGameTimer;
+import static com.almasb.fxgl.dsl.FXGLForKtKt.runOnce;
 
 public class SnakeApplication extends GameApplication {
 
@@ -22,6 +29,8 @@ public class SnakeApplication extends GameApplication {
     CollectibleItems appleItem = new CollectibleItems();
     Hud hud = new Hud();
     Play play = new Play();
+
+    TimerAction timerAction;
 
     // bunch of constants
     static final int SCREEN_WIDTH = 1024;
@@ -32,6 +41,7 @@ public class SnakeApplication extends GameApplication {
     static final int DEFAULT_SCORE = 0;
     static final double DEFAULT_TIMER = 0;
     static final double DEFAULT_SPEED = 0.12;
+    static final int DEFAULT_COUNTDOWN = 3;
 
     int applesEaten = DEFAULT_EATEN_APPLES;
     int bodyParts = DEFAULT_BODY_PARTS;
@@ -43,10 +53,18 @@ public class SnakeApplication extends GameApplication {
 
     boolean running = true;
     boolean isGameOver = false;
+
+    boolean isCountingDown = true;
+    int countdown = DEFAULT_COUNTDOWN;
+    int countdownTimer = (int) DEFAULT_TIMER;
+
     String direction = "Down"; // Start direction
 
     // Need this right bellow to concatenate Score + updatedScore
     Text mainHUD = hud.defaultHUD(SCREEN_WIDTH, updatedScore);
+
+    // Workaround to make count timer refresh on screen
+    Text countHUD = hud.countdownHUD(countdown, SCREEN_WIDTH, SCREEN_HEIGHT);
 
     @Override
     protected void initSettings(GameSettings settings) {
@@ -63,9 +81,18 @@ public class SnakeApplication extends GameApplication {
     @Override
     protected void initGame() {
         hud.initBackground();
+
+        // Pauses the game to make countdown make sense... prob there is a function to do it, but I cant see on wiki
+        running = false;
+        setCountingDown();
+
         snakePlayer.createSnake(bodyParts, SCREEN_WIDTH, SCREEN_HEIGHT, UNIT_SIZE);
         appleItem.createApple(SCREEN_WIDTH, SCREEN_HEIGHT, UNIT_SIZE, EntityType.ITEM, "apple.png", snakePlayer);
         play.playBGM("soundtrack.wav");
+
+        // Built the countdown the first time
+        // When clicked R, the restart functions handles it
+        hud.buildCustomHUD(countHUD);
     }
 
     // default angle 180
@@ -212,7 +239,7 @@ public class SnakeApplication extends GameApplication {
             snake.growSnake(bodyParts);
             bodyParts++;
 
-            gameSpeed -= 0.001;
+            gameSpeed -= 0.002;
         }
     }
 
@@ -244,7 +271,8 @@ public class SnakeApplication extends GameApplication {
     private void restartGame() {
         FXGL.getGameWorld().getEntitiesCopy().forEach(Entity::removeFromWorld);
 
-        running = true;
+        hud.buildCustomHUD(countHUD);
+        setCountingDown();
         isGameOver = false;
         moveTimer = DEFAULT_TIMER;
         gameSpeed = DEFAULT_SPEED;
@@ -272,5 +300,35 @@ public class SnakeApplication extends GameApplication {
 
     private void pauseGame() {
         running = running ? false : true;
+    }
+
+    private  void setCountingDown() {
+        countHUD.setText(String.valueOf(countdown));
+
+        FXGL.getGameTimer().runOnceAfter(() -> {
+            countHUD.setText("2");
+        }, Duration.seconds(1));
+
+        FXGL.getGameTimer().runOnceAfter(() -> {
+            countHUD.setText("1");
+        }, Duration.seconds(2));
+
+        FXGL.getGameTimer().runOnceAfter(() -> {
+            countHUD.setText("0");
+
+            FadeTransition fadeOut = new FadeTransition(Duration.seconds(0.25), countHUD);
+            fadeOut.setFromValue(1.0);
+            fadeOut.setToValue(0.0);
+
+            fadeOut.setOnFinished(e -> {
+                hud.removeCustomHUD(countHUD);
+                running = true;
+
+                countHUD.setOpacity(1.0); // Need to re-set the opacity, cuz it holds the state, if dont, the restar cuntdown will not work
+            });
+
+            fadeOut.play();
+
+        }, Duration.seconds(3));
     }
 }
