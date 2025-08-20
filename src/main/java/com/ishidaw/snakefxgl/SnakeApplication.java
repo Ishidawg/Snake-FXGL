@@ -5,7 +5,6 @@ import com.almasb.fxgl.app.GameApplication;
 import com.almasb.fxgl.app.GameSettings;
 import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.entity.Entity;
-import com.almasb.fxgl.time.TimerAction;
 import com.ishidaw.snakefxgl.Entities.CollectibleItems;
 import com.ishidaw.snakefxgl.Entities.Snake;
 import com.ishidaw.snakefxgl.Utils.Hud;
@@ -29,7 +28,6 @@ public class SnakeApplication extends GameApplication {
     // bunch of constants
     static final int SCREEN_WIDTH = 1024;
     static final int SCREEN_HEIGHT = 1024;
-    static final int DEFAULT_EATEN_APPLES = 0;
     static final int DEFAULT_BODY_PARTS = 4;
     static final int UNIT_SIZE = 64; // Cell size
     static final int DEFAULT_SCORE = 0;
@@ -37,9 +35,9 @@ public class SnakeApplication extends GameApplication {
     static final double DEFAULT_SPEED = 0.12;
     static final int DEFAULT_COUNTDOWN = 3;
 
-    int applesEaten = DEFAULT_EATEN_APPLES;
     int bodyParts = DEFAULT_BODY_PARTS;
-    int updatedScore = DEFAULT_SCORE;
+    int score = DEFAULT_SCORE;
+    int highScore = DEFAULT_SCORE;
 
     // Keeps snake under controlled speed
     private double moveTimer = DEFAULT_TIMER; // Just iterate elapsed time
@@ -52,9 +50,6 @@ public class SnakeApplication extends GameApplication {
     int countdown = DEFAULT_COUNTDOWN;
 
     String direction = "Down"; // Start direction
-
-    // Need this right bellow to concatenate Score + updatedScore
-    Text mainHUD = hud.defaultHUD(SCREEN_WIDTH, updatedScore);
 
     // Workaround to make count timer refresh on screen
     Text countHUD = hud.countdownHUD(countdown, SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -82,6 +77,10 @@ public class SnakeApplication extends GameApplication {
         snakePlayer.createSnake(bodyParts, SCREEN_WIDTH, SCREEN_HEIGHT, UNIT_SIZE);
         appleItem.createApple(EntityType.ITEM, "apple.png", snakePlayer);
         play.playBGM("soundtrack.wav");
+
+        hud.mainHUD();
+        hud.scoreLabel();
+        hud.highScoreLabel();
 
         // Built the countdown the first time
         // When clicked R, the restart functions handles it
@@ -157,13 +156,6 @@ public class SnakeApplication extends GameApplication {
         }
     }
 
-    public void setUpdatedScore() {
-        updatedScore = FXGL.geti("applesEatenFXGL");
-        hud.removeCustomHUD(mainHUD);
-        mainHUD = hud.defaultHUD(SCREEN_WIDTH, updatedScore);
-        hud.buildCustomHUD(mainHUD);
-    }
-
     private void moveOneStep() {
         checkSnakeCollision();
         checkItemCollision(appleItem, snakePlayer);
@@ -198,7 +190,7 @@ public class SnakeApplication extends GameApplication {
         // Check if head hits screen bounds
         double headX = snakePlayer.snakeHeadX();
         double headY = snakePlayer.snakeHeadY();
-        if (headX < 0 || headX >= SCREEN_WIDTH || headY < 0 || headY >= SCREEN_HEIGHT) {
+        if (headX < 0 || headX >= SCREEN_WIDTH || headY < 64 || headY >= SCREEN_HEIGHT) {
             gameOver();
             FXGL.play("hit.wav");
             return;
@@ -227,10 +219,9 @@ public class SnakeApplication extends GameApplication {
 
             FXGL.inc("applesEatenFXGL", +1);
 
-            setUpdatedScore();
-
             snake.growSnake(bodyParts);
             bodyParts++;
+            score++;
 
             gameSpeed -= 0.002;
         }
@@ -238,12 +229,13 @@ public class SnakeApplication extends GameApplication {
 
     @Override
     protected void initGameVars(Map<String, Object> vars) {
-        vars.put("applesEatenFXGL", applesEaten);
+        vars.put("applesEatenFXGL", score);
+        vars.put("highScoreFXGL", highScore);
     }
 
-    @Override
-    protected void initUI() {
-        hud.buildCustomHUD(mainHUD); // Call through this function, so I can update the score value
+    private void setHighScore() {
+        if (score > highScore) highScore = score;
+        FXGL.set("highScoreFXGL", highScore);
     }
 
     // I was pretending to have the gameOver and restarGame inside a class GameState, but was resulting in a cyclic dependence
@@ -259,19 +251,20 @@ public class SnakeApplication extends GameApplication {
         play.stopBGM();
 
         hud.gameOverHUD();
+        setHighScore();
     }
 
     private void restartGame() {
         FXGL.getGameWorld().getEntitiesCopy().forEach(Entity::removeFromWorld);
 
         hud.buildCustomHUD(countHUD);
+        isCountingDown = true;
         setCountingDown();
         isGameOver = false;
         moveTimer = DEFAULT_TIMER;
         gameSpeed = DEFAULT_SPEED;
 
-        updatedScore = DEFAULT_SCORE;
-        applesEaten = DEFAULT_EATEN_APPLES;
+        score = DEFAULT_SCORE;
         bodyParts = DEFAULT_BODY_PARTS;
         direction = "Down";
 
@@ -286,9 +279,9 @@ public class SnakeApplication extends GameApplication {
 
         play.playBGM("soundtrack.wav");
 
-        hud.removeCustomHUD(mainHUD);
-        mainHUD = hud.defaultHUD(SCREEN_WIDTH, updatedScore);
-        hud.buildCustomHUD(mainHUD);
+        hud.mainHUD();
+        hud.scoreLabel();
+        hud.highScoreLabel();
     }
 
     private void pauseGame() {

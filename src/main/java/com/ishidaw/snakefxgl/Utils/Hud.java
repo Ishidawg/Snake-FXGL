@@ -1,11 +1,15 @@
 package com.ishidaw.snakefxgl.Utils;
 
 import com.almasb.fxgl.dsl.FXGL;
+import com.almasb.fxgl.entity.Entity;
 import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontSmoothingType;
 import javafx.scene.text.Text;
+
+import static com.almasb.fxgl.dsl.FXGLForKtKt.getGameScene;
+import static com.almasb.fxgl.dsl.FXGLForKtKt.getWorldProperties;
 
 public class Hud extends Node {
 
@@ -33,7 +37,7 @@ public class Hud extends Node {
         counting.setFontSmoothingType(FontSmoothingType.LCD);
         counting.setFont(Font.font(18));
         counting.setTranslateX((SCREEN_WIDTH - counting.getLayoutBounds().getWidth()) / 2);
-        counting.setTranslateY((double) SCREEN_HEIGHT / 2);
+        counting.setTranslateY((double) SCREEN_HEIGHT / 4);
 
         counting.setFont(gameFont);
         counting.setStroke(Color.BLACK);
@@ -42,31 +46,57 @@ public class Hud extends Node {
         return counting;
     }
 
-    public Text defaultHUD(
-            int SCREEN_WIDTH,
-            int scoreUpdatedValue
-    ) {
-        StringBuilder finalScore = new StringBuilder();
+    public void mainHUD() {
+//        Node hud = FXGL.entityBuilder()
+//                .view("general.png")
+//                .buildAndAttach();
+        Node main = FXGL.getAssetLoader().loadTexture("general.png");
+
+        getGameScene().addUINode(main);
+    }
+
+
+    public void scoreLabel() {
         Text scoreLabel = new Text();
 
-        scoreLabel.setScaleX(2);
-        scoreLabel.setScaleY(2);
+        scoreLabel.setScaleX(1);
+        scoreLabel.setScaleY(1);
         scoreLabel.setFill(Color.WHITE);
         scoreLabel.setFontSmoothingType(FontSmoothingType.LCD);
-        scoreLabel.setFont(Font.font(18));
-        scoreLabel.setTranslateX((SCREEN_WIDTH - scoreLabel.getLayoutBounds().getWidth()) / 2);
-        scoreLabel.setTranslateY(50);
+        scoreLabel.setFont(Font.font(20));
+        scoreLabel.setTranslateX(64);
+        scoreLabel.setTranslateY(42);
 
-        finalScore.append("SCORE ").append(scoreUpdatedValue);
-        scoreLabel.setText(String.valueOf(finalScore));
-        FXGL.centerTextX(scoreLabel, 0, SCREEN_WIDTH);
+        scoreLabel.textProperty().bind(getWorldProperties().intProperty("applesEatenFXGL").asString());
 
         scoreLabel.setFont(gameFont);
         scoreLabel.setStroke(Color.BLACK);
         scoreLabel.setStrokeWidth(1);
 
-        return scoreLabel;
+        FXGL.getGameScene().addUINode(scoreLabel);
     }
+
+    public void highScoreLabel() {
+        Text highScoreLabel = new Text();
+
+        highScoreLabel.setScaleX(1);
+        highScoreLabel.setScaleY(1);
+        highScoreLabel.setFill(Color.WHITE);
+        highScoreLabel.setFontSmoothingType(FontSmoothingType.LCD);
+        highScoreLabel.setFont(Font.font(20));
+        highScoreLabel.setTranslateX(192);
+        highScoreLabel.setTranslateY(42);
+
+        highScoreLabel.textProperty().bind(getWorldProperties().intProperty("highScoreFXGL").asString());
+
+        highScoreLabel.setFont(gameFont);
+        highScoreLabel.setStroke(Color.BLACK);
+        highScoreLabel.setStrokeWidth(1);
+
+        FXGL.getGameScene().addUINode(highScoreLabel);
+    }
+
+
 
     public void buildCustomHUD(Text scoreLabel) {
         FXGL.getGameScene().addUINode(scoreLabel);
