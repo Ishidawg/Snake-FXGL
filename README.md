@@ -24,4 +24,4 @@ In fact, the only build that I had problem was with *Windows* version that I had
 
 Another tool that I use just to add an icon to the `snake.exe` was [Icon Changer](https://github.com/stefanGaina/Icon-Changer).
 
-*The background music that keeps looping in the game is kinda broken, because it's not loop perfectly. I don't know exactly why tho..*
+*The background music that keeps looping in the game is kinda broken, because it's not loop perfectly. I don't know exactly why tho...*
