@@ -3,7 +3,7 @@
 
 I've created this game to **learn more** about *Java, OOP, A&D (arrays)* and to be **more familiar** with java *sintax*. This was my goal so I can *expand* things a little more and do a *Spring* project and stuff.
 
-**FXGL 11** was my choice because I see that the author is very compromised with teaching others to use it, the [FXGL github](https://github.com/AlmasB/FXGL) page has so many examples, his [youtube channel](https://www.youtube.com/playlist?list=PL4h6ypqTi3RTiTuAQFKE6xwflnPKyFuPp) is full of videos and the [wiki](https://github.com/AlmasB/FXGL/wiki/FXGL-11) is kinda decent. Also, I did use a little bit of *Swing* before and *JavaFX* was **way more recomended**. There is another another framework that I want to use called [libGDX](https://github.com/libgdx/libgdx).
+**FXGL 11** was my choice because I see that the author is very compromised with teaching others to use it, the [FXGL github page](https://github.com/AlmasB/FXGL) has so many examples, his [youtube channel](https://www.youtube.com/playlist?list=PL4h6ypqTi3RTiTuAQFKE6xwflnPKyFuPp) is full of videos and the [wiki](https://github.com/AlmasB/FXGL/wiki/FXGL-11) is kinda decent. Also, I did use a little bit of *Swing* before and *JavaFX* was **way more recomended**. There is another another framework that I want to use called [libGDX](https://github.com/libgdx/libgdx).
 
 The art was maded by myself (cleary inspired by the [google's snake](https://sites.google.com/site/populardoodlegames/google-snake)) on [Inkscape](https://inkscape.org/) *(svg to png)*. Also the *"soundtrack"* *(sounds like a kid smashing a Nokia 3310 buttons with the highest sound possible)* that I made was using a free website called [Song Maker](https://musiclab.chromeexperiments.com/Song-Maker).
 
