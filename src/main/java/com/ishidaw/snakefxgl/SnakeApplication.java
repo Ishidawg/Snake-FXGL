@@ -90,27 +90,35 @@ public class SnakeApplication extends GameApplication {
 
     // default angle 180
     public void playerMovementUp() {
-        direction = "Up";
-        snakePlayer.setSnakeHead(90);
-        snakePlayer.setSnakeBody(90);
+        FXGL.getGameTimer().runOnceAfter(() -> {
+            direction = "Up";
+            snakePlayer.setSnakeHead(90);
+            snakePlayer.setSnakeBody(90);
+        }, Duration.millis(70));
     }
 
     public void playerMovementDown() {
-        direction = "Down";
-        snakePlayer.setSnakeHead(270);
-        snakePlayer.setSnakeBody(270);
+        FXGL.getGameTimer().runOnceAfter(() -> {
+            direction = "Down";
+            snakePlayer.setSnakeHead(270);
+            snakePlayer.setSnakeBody(270);
+        }, Duration.millis(70));
     }
 
     public void playerMovementRight() {
-        direction = "Right";
-        snakePlayer.setSnakeHead(180);
-        snakePlayer.setSnakeBody(180);
+        FXGL.getGameTimer().runOnceAfter(() -> {
+            direction = "Right";
+            snakePlayer.setSnakeHead(180);
+            snakePlayer.setSnakeBody(180);
+        }, Duration.millis(70));
     }
 
     public void playerMovementLeft() {
-        direction = "Left";
-        snakePlayer.setSnakeHead(360);
-        snakePlayer.setSnakeBody(360);
+        FXGL.getGameTimer().runOnceAfter(() -> {
+            direction = "Left";
+            snakePlayer.setSnakeHead(360);
+            snakePlayer.setSnakeBody(360);
+        }, Duration.millis(70));
     }
 
     @Override
