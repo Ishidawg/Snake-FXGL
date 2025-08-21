@@ -1,7 +1,7 @@
 # Snake FXGL 🐍
 > A game created using FXGL to learn and be more familiar with java sintax.
 
-I've created this game to **learn more** about *Java, OOP, A&D (arrays)* and to be **more familiar** with java *sintax*. This was my goal so I can *expand* things a little more and do a *Spring* project and stuff.
+I've created this game to **learn more** about *Java, OOP, A&DS (arrays)* and to be **more familiar** with java *sintax*. This was my goal so I can *expand* things a little more and do a *Spring* project and stuff.
 
 **FXGL 11** was my choice because I see that the author is very compromised with teaching others to use it, the [FXGL github page](https://github.com/AlmasB/FXGL) has so many examples, his [youtube channel](https://www.youtube.com/playlist?list=PL4h6ypqTi3RTiTuAQFKE6xwflnPKyFuPp) is full of videos and the [wiki](https://github.com/AlmasB/FXGL/wiki/FXGL-11) is kinda decent. Also, I did use a little bit of *Swing* before and *JavaFX* was **way more recomended**. There is another another framework that I want to use called [libGDX](https://github.com/libgdx/libgdx).
 
