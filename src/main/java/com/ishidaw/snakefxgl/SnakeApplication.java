@@ -1,6 +1,5 @@
 package com.ishidaw.snakefxgl;
 
-import com.almasb.fxgl.app.CursorInfo;
 import com.almasb.fxgl.app.GameApplication;
 import com.almasb.fxgl.app.GameSettings;
 import com.almasb.fxgl.dsl.FXGL;
@@ -26,8 +25,8 @@ public class SnakeApplication extends GameApplication {
     Play play = new Play();
 
     // bunch of constants
-    static final int SCREEN_WIDTH = 1024;
-    static final int SCREEN_HEIGHT = 1024;
+    static final int SCREEN_WIDTH = 768;
+    static final int SCREEN_HEIGHT = 768;
     static final int DEFAULT_BODY_PARTS = 4;
     static final int UNIT_SIZE = 64; // Cell size
     static final int DEFAULT_SCORE = 0;
@@ -52,7 +51,7 @@ public class SnakeApplication extends GameApplication {
     String direction = "Down"; // Start direction
 
     // Workaround to make count timer refresh on screen
-    Text countHUD = hud.countdownHUD(countdown, SCREEN_WIDTH, SCREEN_HEIGHT);
+    Text countHUD = hud.countdownHUD(SCREEN_WIDTH, SCREEN_HEIGHT);
 
     @Override
     protected void initSettings(GameSettings settings) {
@@ -63,11 +62,13 @@ public class SnakeApplication extends GameApplication {
         settings.setTicksPerSecond(60);
         settings.setGameMenuEnabled(false);
         settings.setMainMenuEnabled(false);
-        settings.setDefaultCursor(new CursorInfo("empty_cursor.png", 0, 0)); // I don't know how to set the cursor to invisible...
+        settings.setFullScreenAllowed(true);
+        settings.setAppIcon("snake_head.png");
     }
 
     @Override
     protected void initGame() {
+        FXGL.getGameScene().getRoot().setCursor(javafx.scene.Cursor.NONE);
         hud.initBackground();
 
         // Pauses the game to make countdown make sense... prob there is a function to do it, but I cant see on wiki
@@ -291,13 +292,9 @@ public class SnakeApplication extends GameApplication {
     private  void setCountingDown() {
         countHUD.setText(String.valueOf(countdown));
 
-        FXGL.getGameTimer().runOnceAfter(() -> {
-            countHUD.setText("2");
-        }, Duration.seconds(1));
+        FXGL.getGameTimer().runOnceAfter(() -> countHUD.setText("2"), Duration.seconds(1));
 
-        FXGL.getGameTimer().runOnceAfter(() -> {
-            countHUD.setText("1");
-        }, Duration.seconds(2));
+        FXGL.getGameTimer().runOnceAfter(() -> countHUD.setText("1"), Duration.seconds(2));
 
         FXGL.getGameTimer().runOnceAfter(() -> {
             countHUD.setText("0");
@@ -311,7 +308,7 @@ public class SnakeApplication extends GameApplication {
                 running = true;
                 isCountingDown = false;
 
-                countHUD.setOpacity(1.0); // Need to re-set the opacity, cuz it holds the state, if dont, the restar cuntdown will not work
+                countHUD.setOpacity(1.0); // Need to re-set the opacity, cuz it holds the state, if you don't, the restar countdown will not work
             });
 
             fadeOut.play();

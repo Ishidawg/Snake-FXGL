@@ -1,6 +1,5 @@
 package com.ishidaw.snakefxgl.Entities;
 
-import com.almasb.fxgl.core.collection.Array;
 import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.entity.Entity;
 import com.almasb.fxgl.entity.components.CollidableComponent;
@@ -26,14 +25,14 @@ public class CollectibleItems extends Entity {
         do {
 
             // Returns one of {64, 128, 192, 256, 320, 384, 448, 512, 576, 640, 704, 768, 832, 896, 960}
-            applePosition.appleX = random.nextInt(16) * 64;
+            applePosition.appleX = random.nextInt(12) * 64;
 
             // Try to prevent to spawn on the first unit size of the screen height
-            // Need to take notes on this: random.nextInt(15) * 64 + 64 -> 64 to 960
-            // NextInt(15) means that I have 15 numbers, stating FROM 0 to 14
+            // Need to take notes on this: random.nextInt(11) * 64 + 64 -> 64 to 768
+            // NextInt(11) means that I have 11 numbers, stating FROM 0 to 10
             // Every number gets this: 0*0+64=64, 10*64+64=704 and so on until 14*64+64=960
             // Returns one of {64, 128, 192, 256, 320, 384, 448, 512, 576, 640, 704, 768, 832, 896, 960}
-            applePosition.appleY = random.nextInt(15) * 64 + 64;
+            applePosition.appleY = random.nextInt(11) * 64 + 64;
 
             // to ensure that an item (apple) will not spawn inside the snake
             onSnake = snake.getSnakeUnits().stream().anyMatch(segment ->
@@ -60,5 +59,4 @@ public class CollectibleItems extends Entity {
     public void removeItem() {
         this.item.removeFromWorld();
     }
-
 }

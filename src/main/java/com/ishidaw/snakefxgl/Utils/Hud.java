@@ -1,35 +1,35 @@
 package com.ishidaw.snakefxgl.Utils;
 
 import com.almasb.fxgl.dsl.FXGL;
-import com.almasb.fxgl.entity.Entity;
+import javafx.animation.FadeTransition;
 import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontSmoothingType;
 import javafx.scene.text.Text;
+import javafx.util.Duration;
 
 import static com.almasb.fxgl.dsl.FXGLForKtKt.getGameScene;
 import static com.almasb.fxgl.dsl.FXGLForKtKt.getWorldProperties;
 
 public class Hud extends Node {
-
     // For some reason, just using the default Font.font("Gameplay.ttf") was not working AT ALL
     // So I get the font directly from the source
     Font gameFont = Font.loadFont(getClass().getResourceAsStream("/assets/ui/fonts/Gameplay.ttf"), 26);
 
     public void initBackground() {
         FXGL.entityBuilder()
-                .view("background.png")
+                .view("background768.png")
                 .buildAndAttach();
     }
 
     public void gameOverHUD() {
         FXGL.entityBuilder()
-                .view("gameover.png")
+                .view("gameover768.png")
                 .buildAndAttach();
     }
 
-    public Text countdownHUD(int countdown, int SCREEN_WIDTH, int SCREEN_HEIGHT) {
+    public Text countdownHUD( int SCREEN_WIDTH, int SCREEN_HEIGHT) {
         Text counting = new Text();
         counting.setScaleX(4);
         counting.setScaleY(4);
@@ -47,12 +47,25 @@ public class Hud extends Node {
     }
 
     public void mainHUD() {
-//        Node hud = FXGL.entityBuilder()
-//                .view("general.png")
-//                .buildAndAttach();
-        Node main = FXGL.getAssetLoader().loadTexture("general.png");
+        Node topbar = FXGL.getAssetLoader().loadTexture("topbar768.png");
+        Node pause = FXGL.getAssetLoader().loadTexture("pause768.png");
 
-        getGameScene().addUINode(main);
+        getGameScene().addUINode(topbar);
+        getGameScene().addUINode(pause);
+
+        FXGL.getGameTimer().runOnceAfter(() -> {
+            FadeTransition fadeOut = new FadeTransition(Duration.seconds(0.25), pause);
+            fadeOut.setFromValue(1.0);
+            fadeOut.setToValue(0.0);
+
+            fadeOut.setOnFinished(e -> {
+                getGameScene().removeUINode(pause);
+
+                pause.setOpacity(1.0);
+            });
+
+            fadeOut.play();
+        }, Duration.seconds(3));
     }
 
 

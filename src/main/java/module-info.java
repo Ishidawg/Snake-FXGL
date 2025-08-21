@@ -6,6 +6,7 @@ open module com.ishidaw.snakefxgl {
     requires com.almasb.fxgl.entity;
     requires javafx.graphics;
     requires com.almasb.fxgl.core;
+    requires javafx.base;
 
     exports com.ishidaw.snakefxgl;
     exports com.ishidaw.snakefxgl.Entities;
