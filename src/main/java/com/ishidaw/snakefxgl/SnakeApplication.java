@@ -44,6 +44,7 @@ public class SnakeApplication extends GameApplication {
 
     boolean running = true;
     boolean isGameOver = false;
+    boolean isGamePaused = false;
 
     boolean isCountingDown = true;
     int countdown = DEFAULT_COUNTDOWN;
@@ -144,9 +145,9 @@ public class SnakeApplication extends GameApplication {
             if(snakePlayer.getSnakeUnits().getFirst().getPosition().getX() > 0 && !direction.equals("Right")) playerMovementLeft();
         });
         FXGL.onKeyDown(KeyCode.R, () -> {
-            if (!running && !isCountingDown) restartGame();
+            if (!running && !isCountingDown && !isGamePaused) restartGame();
         });
-        FXGL.onKeyDown(KeyCode.P, () -> { if (!isGameOver) pauseGame();});
+        FXGL.onKeyDown(KeyCode.P, () -> { if (!isGameOver && !isCountingDown) pauseGame();});
     }
 
     @Override
@@ -270,6 +271,7 @@ public class SnakeApplication extends GameApplication {
         isCountingDown = true;
         setCountingDown();
         isGameOver = false;
+        isGamePaused = false;
         moveTimer = DEFAULT_TIMER;
         gameSpeed = DEFAULT_SPEED;
 
@@ -295,6 +297,7 @@ public class SnakeApplication extends GameApplication {
 
     private void pauseGame() {
         running = running ? false : true;
+        isGamePaused = isGamePaused ? false : true;
     }
 
     private  void setCountingDown() {
