@@ -14,16 +14,21 @@ public class Snake {
     private final List<Entity> snakeUnits = new ArrayList<>();
 
     public void createSnake(int bodyParts, int SCREEN_WIDTH, int SCREEN_HEIGHT, int UNIT_SIZE) {
+        double headX = (double) SCREEN_WIDTH / 2;
+        double headY = (double) SCREEN_HEIGHT / 2;
+
+
         for (int i = 0; i < bodyParts; i++) {
             String textureChoice = i == 0 ? "snake_head.png" : "snake_body.png";
 
-                    Entity segment = FXGL.entityBuilder()
-                    .type(EntityType.PLAYER)
-                    .at((double) SCREEN_WIDTH / 2 - i * UNIT_SIZE, (double) SCREEN_HEIGHT / 2)
-                    .viewWithBBox(textureChoice)
-                    .with(new CollidableComponent(true))
-                    .buildAndAttach();
+            Entity segment = FXGL.entityBuilder()
+                .type(EntityType.PLAYER)
+                .at(headX, headY - i * UNIT_SIZE)
+                .viewWithBBox(textureChoice)
+                .with(new CollidableComponent(true))
+                .buildAndAttach();
             getSnakeUnits().add(segment);
+            segment.setRotation(270); // workaround to set correct body rotation
         }
 
         // Means that the snakeUnits[0] is the "head" -> snake

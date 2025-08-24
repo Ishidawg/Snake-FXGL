@@ -229,7 +229,7 @@ public class SnakeApplication extends GameApplication {
             bodyParts++;
             score++;
 
-            gameSpeed -= 0.002;
+            gameSpeed -= 0.001;
         }
     }
 
