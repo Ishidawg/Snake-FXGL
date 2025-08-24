@@ -42,6 +42,8 @@ public class SnakeApplication extends GameApplication {
     private double moveTimer = DEFAULT_TIMER; // Just iterate elapsed time
     private double gameSpeed = DEFAULT_SPEED; // Seconds between snakes moves
 
+    private String bufferDirection = null; // buffer direction to prevent a bug that I've tried to fix using a timer...
+
     boolean running = true;
     boolean isGameOver = false;
     boolean isGamePaused = false;
@@ -89,37 +91,30 @@ public class SnakeApplication extends GameApplication {
         hud.buildCustomHUD(countHUD);
     }
 
-    // default angle 180
-    public void playerMovementUp() {
-        FXGL.getGameTimer().runOnceAfter(() -> {
-            direction = "Up";
-            snakePlayer.setSnakeHead(90);
-            snakePlayer.setSnakeBody(90);
-        }, Duration.millis(70));
+    private void requestDirection(String dir) {
+        // returns nothing if is the opposite direction or if there is a direction on the buffer
+        if ("Up".equals(direction) && "Down".equals(dir)) return;
+        if ("Down".equals(direction) && "Up".equals(dir)) return;
+        if ("Left".equals(direction) && "Right".equals(dir)) return;
+        if ("Right".equals(direction) && "Left".equals(dir)) return;
+        if (bufferDirection != null) return;
+
+        bufferDirection = dir;
+
+        // default angle 180
+        switch (dir) {
+            case "Up":    snakePlayer.setSnakeHead(90); snakePlayer.setSnakeBody(90); break;
+            case "Down":  snakePlayer.setSnakeHead(270); snakePlayer.setSnakeBody(270); break;
+            case "Left":  snakePlayer.setSnakeHead(360); snakePlayer.setSnakeBody(360); break;
+            case "Right": snakePlayer.setSnakeHead(180); snakePlayer.setSnakeBody(180); break;
+        }
     }
 
-    public void playerMovementDown() {
-        FXGL.getGameTimer().runOnceAfter(() -> {
-            direction = "Down";
-            snakePlayer.setSnakeHead(270);
-            snakePlayer.setSnakeBody(270);
-        }, Duration.millis(70));
-    }
-
-    public void playerMovementRight() {
-        FXGL.getGameTimer().runOnceAfter(() -> {
-            direction = "Right";
-            snakePlayer.setSnakeHead(180);
-            snakePlayer.setSnakeBody(180);
-        }, Duration.millis(70));
-    }
-
-    public void playerMovementLeft() {
-        FXGL.getGameTimer().runOnceAfter(() -> {
-            direction = "Left";
-            snakePlayer.setSnakeHead(360);
-            snakePlayer.setSnakeBody(360);
-        }, Duration.millis(70));
+    private void applyBufferDirection() {
+        if (bufferDirection != null) {
+            direction = bufferDirection;
+            bufferDirection = null;
+        }
     }
 
     @Override
@@ -127,22 +122,22 @@ public class SnakeApplication extends GameApplication {
         // The running check is to ignore inputs if it's game over
         FXGL.onKeyDown(KeyCode.W, () -> {
             if (!running) return;
-            if(snakePlayer.getSnakeUnits().getFirst().getPosition().getY() > 0 && !direction.equals("Down")) playerMovementUp();
+            requestDirection("Up");
         });
 
         FXGL.onKeyDown(KeyCode.S, () -> {
             if (!running) return;
-            if(snakePlayer.getSnakeUnits().getFirst().getPosition().getY() < SCREEN_HEIGHT - UNIT_SIZE && !direction.equals("Up")) playerMovementDown();
+            requestDirection("Down");
         });
 
         FXGL.onKeyDown(KeyCode.D, () -> {
             if (!running) return;
-            if(snakePlayer.getSnakeUnits().getFirst().getPosition().getX() < SCREEN_WIDTH - UNIT_SIZE && !direction.equals("Left")) playerMovementRight();
+            requestDirection("Right");
         });
 
         FXGL.onKeyDown(KeyCode.A, () -> {
             if (!running) return;
-            if(snakePlayer.getSnakeUnits().getFirst().getPosition().getX() > 0 && !direction.equals("Right")) playerMovementLeft();
+            requestDirection("Left");
         });
         FXGL.onKeyDown(KeyCode.R, () -> {
             if (!running && !isCountingDown && !isGamePaused) restartGame();
@@ -167,6 +162,7 @@ public class SnakeApplication extends GameApplication {
     }
 
     private void moveOneStep() {
+        applyBufferDirection();
         checkSnakeCollision();
         checkItemCollision(appleItem, snakePlayer);
     }

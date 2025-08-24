@@ -8,6 +8,7 @@ public class Play {
     public void playBGM(String music) {
         Music bgm = FXGL.getAssetLoader().loadMusic(music);
         FXGL.getAudioPlayer().loopMusic(bgm);
+        bgm.getAudio().setVolume(0.2);
     }
 
     public void stopBGM() {
