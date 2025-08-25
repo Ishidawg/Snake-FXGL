@@ -49,6 +49,7 @@ public class SnakeApplication extends GameApplication {
     boolean running = true;
     boolean isGameOver = false;
     boolean isGamePaused = false;
+    boolean isMuted = false;
 
     boolean isCountingDown = true;
     int countdown = DEFAULT_COUNTDOWN;
@@ -193,6 +194,8 @@ public class SnakeApplication extends GameApplication {
             if (!running && !isCountingDown && !isGamePaused) restartGame();
         });
         FXGL.onKeyDown(KeyCode.P, () -> { if (!isGameOver && !isCountingDown) pauseGame();});
+        FXGL.onKeyDown(KeyCode.M, () -> { if (!isGameOver && !isCountingDown) muteSongs();});
+
     }
 
     @Override
@@ -354,6 +357,11 @@ public class SnakeApplication extends GameApplication {
     private void pauseGame() {
         running = running ? false : true;
         isGamePaused = isGamePaused ? false : true;
+    }
+
+    private void muteSongs() {
+        isMuted = isMuted ? false : true;
+        if (isMuted) play.playBGM("soundtrack.wav"); else play.stopBGM();
     }
 
     private  void setCountingDown() {
