@@ -147,7 +147,14 @@ public class SnakeApplication extends GameApplication {
     @Override
     protected void initInput() {
         // The running check is to ignore inputs if it's game over
+        // I know that is not the most beautiful code to repeat the same logic to two KeyDown Functions, but for some reason add  a inputAction increases the input latency
+        // I don't know why it increases the latency, so I just went with the most accurate solution.
         FXGL.onKeyDown(KeyCode.W, () -> {
+            if (!running) return;
+            enqueueDirection("Up");
+        });
+
+        FXGL.onKeyDown(KeyCode.UP, () -> {
             if (!running) return;
             enqueueDirection("Up");
         });
@@ -157,7 +164,17 @@ public class SnakeApplication extends GameApplication {
             enqueueDirection("Down");
         });
 
+        FXGL.onKeyDown(KeyCode.DOWN, () -> {
+            if (!running) return;
+            enqueueDirection("Down");
+        });
+
         FXGL.onKeyDown(KeyCode.D, () -> {
+            if (!running) return;
+            enqueueDirection("Right");
+        });
+
+        FXGL.onKeyDown(KeyCode.RIGHT, () -> {
             if (!running) return;
             enqueueDirection("Right");
         });
@@ -166,6 +183,12 @@ public class SnakeApplication extends GameApplication {
             if (!running) return;
             enqueueDirection("Left");
         });
+
+        FXGL.onKeyDown(KeyCode.LEFT, () -> {
+            if (!running) return;
+            enqueueDirection("Left");
+        });
+
         FXGL.onKeyDown(KeyCode.R, () -> {
             if (!running && !isCountingDown && !isGamePaused) restartGame();
         });
