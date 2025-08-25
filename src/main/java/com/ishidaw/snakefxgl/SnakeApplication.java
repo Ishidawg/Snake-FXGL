@@ -12,6 +12,8 @@ import javafx.animation.FadeTransition;
 import javafx.scene.input.KeyCode;
 import javafx.scene.text.Text;
 
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.Map;
 
 import com.ishidaw.snakefxgl.Enums.EntityType;
@@ -42,7 +44,7 @@ public class SnakeApplication extends GameApplication {
     private double moveTimer = DEFAULT_TIMER; // Just iterate elapsed time
     private double gameSpeed = DEFAULT_SPEED; // Seconds between snakes moves
 
-    private String bufferDirection = null; // buffer direction to prevent a bug that I've tried to fix using a timer...
+    private final Deque<String> inputQueue = new ArrayDeque<>(); // A FIFO array of inputs, like in dark souls that you press O and X, so you get rolling and then drinking an estus
 
     boolean running = true;
     boolean isGameOver = false;
@@ -91,29 +93,54 @@ public class SnakeApplication extends GameApplication {
         hud.buildCustomHUD(countHUD);
     }
 
-    private void requestDirection(String dir) {
-        // returns nothing if is the opposite direction or if there is a direction on the buffer
-        if ("Up".equals(direction) && "Down".equals(dir)) return;
-        if ("Down".equals(direction) && "Up".equals(dir)) return;
-        if ("Left".equals(direction) && "Right".equals(dir)) return;
-        if ("Right".equals(direction) && "Left".equals(dir)) return;
-        if (bufferDirection != null) return;
+    private void enqueueDirection(String enqueueDir) {
+        if (!running) return;
+        
+        // Easy FIFO DataStructure
+        // Peaks lastInput, if the lastInput has a value, then "first out" it
+        String lastInput = inputQueue.peekLast();
+        String runInput = (lastInput != null) ? lastInput : this.direction;
+        
+        if (isOpposite(runInput, enqueueDir)) return;
 
-        bufferDirection = dir;
-
-        // default angle 180
-        switch (dir) {
-            case "Up":    snakePlayer.setSnakeHead(90); snakePlayer.setSnakeBody(90); break;
-            case "Down":  snakePlayer.setSnakeHead(270); snakePlayer.setSnakeBody(270); break;
-            case "Left":  snakePlayer.setSnakeHead(360); snakePlayer.setSnakeBody(360); break;
-            case "Right": snakePlayer.setSnakeHead(180); snakePlayer.setSnakeBody(180); break;
+        // inputs remember
+        int MAX_BUFFERED_INPUTS = 4;
+        if (inputQueue.size() < MAX_BUFFERED_INPUTS) {
+            inputQueue.addLast(enqueueDir);
         }
     }
 
+    private boolean isOpposite(String currentInput, String currentDirection) {
+        return ("Up".equals(currentInput) && "Down".equals(currentDirection)) ||
+                ("Down".equals(currentInput) && "Up".equals(currentDirection)) ||
+                ("Left".equals(currentInput) && "Right".equals(currentDirection)) ||
+                ("Right".equals(currentInput) && "Left".equals(currentDirection));
+    }
+
     private void applyBufferDirection() {
-        if (bufferDirection != null) {
-            direction = bufferDirection;
-            bufferDirection = null;
+        String nextDirection = inputQueue.pollFirst();
+        if (nextDirection == null) return;
+
+        if (isOpposite(this.direction, nextDirection)) return;
+        this.direction = nextDirection;
+
+        switch (nextDirection) {
+            case "Up":
+                snakePlayer.setSnakeHead(90);
+                snakePlayer.setSnakeBody(90);
+                break;
+            case "Down":
+                snakePlayer.setSnakeHead(270);
+                snakePlayer.setSnakeBody(270);
+                break;
+            case "Left":
+                snakePlayer.setSnakeHead(360);
+                snakePlayer.setSnakeBody(360);
+                break;
+            case "Right":
+                snakePlayer.setSnakeHead(180);
+                snakePlayer.setSnakeBody(180);
+                break;
         }
     }
 
@@ -122,22 +149,22 @@ public class SnakeApplication extends GameApplication {
         // The running check is to ignore inputs if it's game over
         FXGL.onKeyDown(KeyCode.W, () -> {
             if (!running) return;
-            requestDirection("Up");
+            enqueueDirection("Up");
         });
 
         FXGL.onKeyDown(KeyCode.S, () -> {
             if (!running) return;
-            requestDirection("Down");
+            enqueueDirection("Down");
         });
 
         FXGL.onKeyDown(KeyCode.D, () -> {
             if (!running) return;
-            requestDirection("Right");
+            enqueueDirection("Right");
         });
 
         FXGL.onKeyDown(KeyCode.A, () -> {
             if (!running) return;
-            requestDirection("Left");
+            enqueueDirection("Left");
         });
         FXGL.onKeyDown(KeyCode.R, () -> {
             if (!running && !isCountingDown && !isGamePaused) restartGame();
@@ -146,24 +173,32 @@ public class SnakeApplication extends GameApplication {
     }
 
     @Override
-    protected void onUpdate(double tpf) { // tpf is approx 0.0167, frame limit = 60
+    protected void onUpdate(double tpf) {
         if (!running) return;
+
         moveTimer += tpf;
 
-        int maxSteps = 10;
         int steps = 0;
 
         // This is the "auto movement" behind the snake, and how speedy is based on the while loop within the Move Timer and GameSpeed
-        while (moveTimer >= gameSpeed && steps < maxSteps) {
+        // Also make it process only the max const per frame
+        // inputs to process in one frame
+        int MAX_CATCHUP_STEPS = 2;
+        while (moveTimer >= gameSpeed && steps < MAX_CATCHUP_STEPS) {
             moveTimer -= gameSpeed;
-            moveOneStep();
             steps++;
+
+            moveOneStep();
+
+            if (!running) break;
         }
     }
 
     private void moveOneStep() {
         applyBufferDirection();
         checkSnakeCollision();
+        if (!running) return;
+
         checkItemCollision(appleItem, snakePlayer);
     }
 
@@ -249,6 +284,7 @@ public class SnakeApplication extends GameApplication {
     private void gameOver() {
         running = false;
         isGameOver = true;
+        inputQueue.clear();
 
         snakePlayer.removeSnake();
 
@@ -261,6 +297,7 @@ public class SnakeApplication extends GameApplication {
     }
 
     private void restartGame() {
+        inputQueue.clear();
         FXGL.getGameWorld().getEntitiesCopy().forEach(Entity::removeFromWorld);
 
         hud.buildCustomHUD(countHUD);
